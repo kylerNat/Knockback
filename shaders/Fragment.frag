@@ -1,0 +1,8 @@
+#version 330
+
+smooth in vec3 pos;
+smooth in vec3 color;
+
+void main() {
+	gl_FragColor = vec4(color, 1.0);
+}
