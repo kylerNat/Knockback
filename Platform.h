@@ -5,6 +5,7 @@
 #include "Files.h"
 #include "Input.h"
 #include "Math.h"
+#include "RenderingStructs.h"
 #include "Game.h"
 
 #include <windows.h>
@@ -18,13 +19,6 @@ const DWORD resolution[2] = {1000, 1000};
 struct shaderInfo{
 	GLenum type;
 	const char * source;
-};
-
-struct vertexObject{
-	files::modelData data;
-	GLuint vertexArrayObject;
-	GLuint vertexBufferObject;
-	GLuint indexBufferObject;
 };
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

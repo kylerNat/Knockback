@@ -1,6 +1,7 @@
 #pragma once
 
 #include <math.h>
+#include <stdlib.h>
 
 template <class type, unsigned d>//bluuuuuuuuuuuuuuugh
 class vec {
@@ -50,7 +51,12 @@ vec<type, 2> normalize(vec<type, 2> a){
 	if(a[0] == 0.0 && a[1] == 0.0){
 		return a;
 	}
-	return scale(a, 1.0/sqrt(dot(a, a)));
+	return scale(a, 1.0f/sqrt(dot(a, a)));
+}
+
+template<class type>
+vec<type, 2> perp(vec<type, 2> a){
+	return vec<type, 2>(-a[1], a[0]);
 }
 
 template<class type>
@@ -101,3 +107,5 @@ mat<type, r, r> multiply(mat<type, c, r> a, mat<type, r, c> b){
 }
 
 float round(float a);
+
+float random();

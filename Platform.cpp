@@ -1,17 +1,6 @@
 #include "Platform.h"
 
-vertexObject bindVO(vertexObject vO){
-	glBindVertexArray(vO.vertexArrayObject);
-	glBindBuffer(GL_ARRAY_BUFFER, vO.vertexBufferObject);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, 0, 0, (void*)((vO.data.vertexBytes)*1/2));
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vO.indexBufferObject);
-	return vO;
-}
-
-vertexObject createVO(files::modelData data){
+vertexObject createVO(modelData data){
 	vertexObject vO;
 	vO.data = data;
 
@@ -363,7 +352,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		//endfrom
 
-		wglSwapIntervalEXT(0);//TODO: temp
+		wglSwapIntervalEXT(1);//TODO: temp
 		
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
@@ -374,9 +363,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	vertexObject vOs[] = {
-		createVO(files::modelData()),
+		createVO(modelData()),
 		createVO(files::getVertexData("models/crosshair.ply")),
 		createVO(files::getVertexData("models/person.ply")),
+		createVO(files::getVertexData("models/bullet.ply")),
 	};
 
 	LARGE_INTEGER oldTime;
@@ -391,46 +381,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	world w = createWorld();
 
 	MSG msg;
+	
 	do {
 		QueryPerformanceCounter(&curTime);
-		float loops = 1.0f;
+		unsigned loops = 1;
 		
 		float dt = (float)(curTime.QuadPart - oldTime.QuadPart)/(float)(frq.QuadPart*loops);
-		for(int i = 0; i < loops; i++){
-			w = worldLoop(w, dt);
+		for(unsigned i = 0; i < loops; i++){
+			worldLoop(w, dt);
 		}
 		oldTime = curTime;
 
 		{//render stuff
-			glClearColor(0.7, 0.8, 1.0, 1.0);
+			glClearColor(0.7f, 0.8f, 1.0f, 1.0f);
 			glClearDepth(1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			glUseProgram(program);
 			GLuint trans = glGetUniformLocation(program, "t");
 
-			float4x4 transform = {
-				1.0, 0.0, 0.0, 0.0,
-				0.0, 1.0, 0.0, 0.0,
-				0.0, 0.0, 1.0, 0.0,
-				0.0, 0.0, 0.0, 1.0,
-			};
+			//<temp>
+			renderObject(scale(w.cam.r, -1.0), float2(10000.0, 0.0), modId_crosshair, vOs, trans);
+			//<\temp>
 
-			for(int i = 0; i < w.n; i++){
-				transform[0][3] = round(getPosition(w, i)[0]*500.0f)/500.0f;
-				transform[1][3] = round(getPosition(w, i)[1]*500.0f)/500.0f;
-				
-				transform[0][0] = -getDirection(w, i)[1];
-				transform[0][1] = -getDirection(w, i)[0];
-				transform[1][0] = getDirection(w, i)[0];
-				transform[1][1] = -getDirection(w, i)[1];
-
-
-				bindVO(vOs[2]);
-				glUniformMatrix4fv(trans, 1, false, (float*)&transform[0][0]);
-				glDrawElements(GL_TRIANGLES, vOs[2].data.indexSize, GL_UNSIGNED_SHORT, 0);
-				glBindVertexArray(0);
-			}
+			renderWorld(w, vOs, trans);
 
 			SwapBuffers(dc);
 		}

@@ -1,19 +1,17 @@
-﻿Build started 6/15/2014 9:28:54 PM.
+﻿Build started 6/19/2014 8:51:06 PM.
      1>Project "C:\Users\Kyler\Programing Stuffs\Knockback\Knockback\Knockback.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Knockback.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Users\Kyler\Programing Stuffs\Knockback\glext" /I"C:\Users\Kyler\Programing Stuffs\Knockback\glew-1.10.0\include" /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Platform.cpp
-         Platform.cpp
-     1>c:\users\kyler\programing stuffs\knockback\knockback\platform.cpp(405): warning C4305: 'argument' : truncation from 'double' to 'GLclampf'
-     1>c:\users\kyler\programing stuffs\knockback\knockback\platform.cpp(405): warning C4305: 'argument' : truncation from 'double' to 'GLclampf'
-     1>c:\users\kyler\programing stuffs\knockback\knockback\platform.cpp(419): warning C4018: '<' : signed/unsigned mismatch
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Users\Kyler\Programing Stuffs\Knockback\glext" /I"C:\Users\Kyler\Programing Stuffs\Knockback\glew-1.10.0\include" /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Game.cpp
+         Game.cpp
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.exe" /NOLOGO /LIBPATH:"C:\Users\Kyler\Programing Stuffs\Knockback\glew-1.10.0\lib" opengl32.lib glu32.lib glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Knockback.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.lib" /MACHINE:X86 Debug\Files.obj
          Debug\Game.obj
          Debug\Input.obj
          Debug\Math.obj
          Debug\Platform.obj
+         Debug\RenderingStructs.obj
          LINK : C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.exe not found or not built by the last incremental link; performing full link
          Knockback.vcxproj -> C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.exe
        Manifest:
@@ -25,4 +23,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.82
+Time Elapsed 00:00:01.56

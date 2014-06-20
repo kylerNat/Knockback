@@ -2,6 +2,16 @@
 
 #include "Math.h"
 #include "Input.h"
+#include "RenderingStructs.h"
+
+#include <GL/glew.h>
+#include <time.h>
+
+#define particle \
+	float m;\
+	float2 r;\
+	float2 v;\
+	float2 dir;
 
 struct body{
 	float m;
@@ -13,30 +23,42 @@ struct body{
 };
 
 struct player{
-	unsigned model;
-	float m;
+	particle
+};
+
+struct weapon{
+	float fireWait;
+	float fireTimer;
+	float spread;
+	float2 offset;
+};
+
+struct bullet{//TODO: make a table of bullet masses to save memory
+	//float m;
 	float2 r;
 	float2 v;
-	float2 dir;
+	bool alive;
+	bullet():/*m(1.0), */r(0), v(0), alive(0){}
+};
+
+struct camera{
+	float2 r;
+	float2 rr;
+	float2 v;
 };
 
 struct world{
-	unsigned mouseModel;
-	float2 up;
 	float2 mousePos;
-	float2 camUp;
-	float2 camPos;
+	camera cam;
 	player plr;
-	unsigned n;
-	unsigned * positions;
-	unsigned * directions;
-	unsigned * ids;
+	bullet bs[1000];
+	weapon gun;
 };
 
-float2 getPosition(world & w, unsigned a);
+void renderObject(float2 pos, float2 dir, modId model, vertexObject * vOs, GLuint trans);
 
-float2 getDirection(world & w, unsigned a);
+void renderWorld(world w, vertexObject * vOs, GLuint trans);
 
 world createWorld();
 
-world worldLoop(world wrld, float dt);
+void worldLoop(world &, float);

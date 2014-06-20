@@ -15,3 +15,7 @@ float round(float a){
 	}
 	return out;
 }
+
+float random(){
+	return ((float)(rand()%(1<<8)))/((float)(1<<8));
+}
