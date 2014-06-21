@@ -383,6 +383,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	MSG msg;
 	
 	do {
+		if(input::pressed('O')){
+			wglSwapIntervalEXT(1);
+		}
+		if(input::pressed('P')){
+			wglSwapIntervalEXT(0);
+		}
+
 		QueryPerformanceCounter(&curTime);
 		unsigned loops = 1;
 		

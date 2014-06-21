@@ -40,7 +40,7 @@ world createWorld(){//make constuctor?
 	
 	world w = {0};
 	
-	w.gun.fireWait = 0.001f;
+	w.gun.fireWait = 0.1f;
 	w.gun.spread = 0.5f;
 	w.gun.offset = float2(0.1f, 0.0f);
 
@@ -48,11 +48,12 @@ world createWorld(){//make constuctor?
 	return w;
 }
 
-//TODO: fix the player appearing in the wrong position at high speeds// has to do with the update order
+//TODO: set accelerations first, then update velocities and positions, otherwise some objects are unsyncronized, which causes problems at low framerates or high speeds
+//TODO: make behavior identical under dfferent frame rates
 void worldLoop(world & w, float dt){//make member function for convinience?
 	w.mousePos = float2(1.0f/(1.0f*500.0f)*input::mouse[0], -1.0f/(1.0f*500.0f)*input::mouse[1]);
-	float2 cam_accel = float2(0.0, 0.0);
-	float2 plrAccel = float2(0.0, 0.0);
+	float2 cam_dv = float2(0.0, 0.0);
+	float2 plr_dv = float2(0.0, 0.0);
 
 	{
 		float2 inDir = float2(
@@ -69,20 +70,20 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 		const float aMag = 200.0f;
 		float velDifSq = dotMe(sub(inDir, w.plr.v));
 		if(velDifSq >= pow(aMag*dt, 2)){
-			plrAccel = add(scale(normalize(sub(inDir, w.plr.v)), aMag*dt), plrAccel);
-			w.plr.v = add(w.plr.v, plrAccel);
+			plr_dv = add(scale(normalize(sub(inDir, w.plr.v)), aMag*dt), plr_dv);
+			w.plr.v = add(w.plr.v, plr_dv);
 		}
 		else{
-			plrAccel = sub(inDir, w.plr.v);		
-			w.plr.v = add(w.plr.v, plrAccel);
-			//w.plr.v = inDir;
+			plr_dv = sub(inDir, w.plr.v);		
+			//w.plr.v = add(w.plr.v, plrAccel);
+			w.plr.v = inDir;
 		}
-
+/*
 		w.plr.r = add(scale(plrAccel, dt*dt/2), add(w.plr.r, scale(w.plr.v, dt)));
 
 		w.cam.r = add(w.plr.r, scale(w.mousePos, 0.3f));
 		w.plr.dir = normalize(sub(add(w.mousePos, w.cam.r), w.plr.r));
-	}
+	*/}
 	
 	for(int i = 0; i < sizeof(w.bs)/sizeof(w.bs[0]); i++){
 		auto a = w.bs[i];
@@ -102,8 +103,10 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 				float2 randF2 = normalize(float2(2.0f*(random()-0.5f), 2.0f*(random()-0.5f)));
 				float theta = atan2(w.plr.dir[0], w.plr.dir[1]);
 				theta += w.gun.spread*2.0f*(random()-0.5f);//TODO: make gaussian distrobution
-				w.bs[i].v = add(scale(float2(sin(theta), cos(theta)), 4.0), w.plr.v);
-				cam_accel = add(scale(randF2, -1.0f), scale(w.plr.dir, 0.5f));
+				float2 relV = scale(float2(sin(theta), cos(theta)), 4.0);
+				w.bs[i].v = add(relV, w.plr.v);
+				w.plr.v = sub(w.plr.v, scale(relV, 0.052f));
+				w.cam.v = add(w.cam.v, add(scale(randF2, -0.5f), scale(w.plr.dir, 0.1f)));
 		
 				w.gun.fireTimer += w.gun.fireWait;
 			}
@@ -120,9 +123,16 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 	}
 
 	{
-		cam_accel = sub(add(cam_accel, scale(w.cam.rr, -100.0f)), scale(w.cam.v, 0.1f));
-		w.cam.v = add(w.cam.v, cam_accel);
-		w.cam.rr = add(scale(cam_accel, dt*dt/2), add(w.cam.rr, scale(w.cam.v, dt)));
+		w.plr.r = add(scale(plr_dv, dt/2), add(w.plr.r, scale(w.plr.v, dt)));
+
+		w.cam.r = add(w.plr.r, scale(w.mousePos, 0.3f));
+		w.plr.dir = normalize(sub(add(w.mousePos, w.cam.r), w.plr.r));
+	}
+
+	{
+		cam_dv = sub(sub(cam_dv, scale(w.cam.rr, dt*10000.0f)), scale(w.cam.v, dt*0.1f));
+		w.cam.v = add(w.cam.v, cam_dv);
+		w.cam.rr = add(scale(cam_dv, dt/2), add(w.cam.rr, scale(w.cam.v, dt)));
 		w.cam.r = add(add(w.plr.r, scale(w.mousePos, 0.3f)), w.cam.rr);
 	}
 }
