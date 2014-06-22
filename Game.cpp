@@ -24,8 +24,6 @@ void renderObject(float2 pos, float2 dir, modId model, vertexObject * vOs, GLuin
 }
 
 void renderWorld(world w, vertexObject * vOs, GLuint trans){
-	renderObject(w.mousePos, float2(0.0, 1.0), modId_crosshair, vOs, trans);
-
 	renderObject(sub(w.plr.r, w.cam.r), w.plr.dir, modId_player, vOs, trans);
 	
 	for(int i = 0; i < sizeof(w.bs)/sizeof(w.bs[0]); i++){
@@ -33,6 +31,8 @@ void renderWorld(world w, vertexObject * vOs, GLuint trans){
 			renderObject(sub(w.bs[i].r, w.cam.r), scale(normalize(w.bs[i].v), 1.0), modId_bullet, vOs, trans);
 		}
 	}
+
+	renderObject(w.mousePos, float2(0.0, 1.0), modId_crosshair, vOs, trans);
 }
 
 world createWorld(){//make constuctor?
@@ -40,7 +40,7 @@ world createWorld(){//make constuctor?
 	
 	world w = {0};
 	
-	w.gun.fireWait = 0.1f;
+	w.gun.fireWait = 0.0015f;
 	w.gun.spread = 0.5f;
 	w.gun.offset = float2(0.1f, 0.0f);
 
@@ -52,7 +52,6 @@ world createWorld(){//make constuctor?
 //TODO: make behavior identical under dfferent frame rates
 void worldLoop(world & w, float dt){//make member function for convinience?
 	w.mousePos = float2(1.0f/(1.0f*500.0f)*input::mouse[0], -1.0f/(1.0f*500.0f)*input::mouse[1]);
-	float2 cam_dv = float2(0.0, 0.0);
 	float2 plr_dv = float2(0.0, 0.0);
 
 	{
@@ -84,6 +83,13 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 		w.cam.r = add(w.plr.r, scale(w.mousePos, 0.3f));
 		w.plr.dir = normalize(sub(add(w.mousePos, w.cam.r), w.plr.r));
 	*/}
+
+	{
+		w.plr.r = add(scale(plr_dv, dt/2), add(w.plr.r, scale(w.plr.v, dt)));
+
+		//w.cam.r = add(w.plr.r, scale(w.mousePos, 0.3f));
+		w.plr.dir = normalize(w.mousePos);
+	}
 	
 	for(int i = 0; i < sizeof(w.bs)/sizeof(w.bs[0]); i++){
 		auto a = w.bs[i];
@@ -105,8 +111,8 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 				theta += w.gun.spread*2.0f*(random()-0.5f);//TODO: make gaussian distrobution
 				float2 relV = scale(float2(sin(theta), cos(theta)), 4.0);
 				w.bs[i].v = add(relV, w.plr.v);
-				w.plr.v = sub(w.plr.v, scale(relV, 0.052f));
-				w.cam.v = add(w.cam.v, add(scale(randF2, -0.5f), scale(w.plr.dir, 0.1f)));
+				//w.plr.v = sub(w.plr.v, scale(relV, 0.052f));
+				w.cam.v = add(w.cam.v, add(scale(randF2, 1.0f), scale(relV, -0.2f)));
 		
 				w.gun.fireTimer += w.gun.fireWait;
 			}
@@ -122,17 +128,37 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 		w.gun.fireTimer = 0.0f;
 	}
 
-	{
-		w.plr.r = add(scale(plr_dv, dt/2), add(w.plr.r, scale(w.plr.v, dt)));
+	{//x = e^(-gamma*t)*A*cos(omega*t + theta) //damped shm //consistaint under different frame rates
+		const float omega = 100.0f;
+		const float gamma = 20.0f;
+		/*
+		float2 oscDir;
+		if(w.cam.rr == float2(0.0f, 0.0f)){
+			oscDir = normalize(w.cam.v);
+		}
+		else {
+			oscDir = normalize(w.cam.rr);
+		}
+		float x = dot(w.cam.rr, oscDir);
+		float v = dot(w.cam.v, oscDir);
+		float theta = atan2(-v-x*gamma, omega*x);
+		float A = sqrt(pow(x, 2) + pow((v+x*gamma)/omega, 2));//by math, not by cons. of energy; A != the undampened amplitude
+		x = exp(-gamma*dt)*A*cos(omega*dt+theta);
+		v = -x*gamma -exp(-gamma*dt)*omega*A*sin(omega*dt+theta);
+		w.cam.rr = scale(oscDir, x);
+		w.cam.v = scale(oscDir, v);
+		*/
+		for(int i = 0; i < 2; i++){
+			float x = w.cam.rr[i];
+			float v = w.cam.v[i];
+			float theta = atan2(-v-x*gamma, omega*x);
+			float A = sqrt(pow(x, 2) + pow((v+x*gamma)/omega, 2));//by math, not by cons. of energy; A != the undampened amplitude
+			x = exp(-gamma*dt)*A*cos(omega*dt+theta);
+			v = -x*gamma -exp(-gamma*dt)*omega*A*sin(omega*dt+theta);
+			w.cam.rr[i] = x;
+			w.cam.v[i] = v;
+		}
 
-		w.cam.r = add(w.plr.r, scale(w.mousePos, 0.3f));
-		w.plr.dir = normalize(sub(add(w.mousePos, w.cam.r), w.plr.r));
-	}
-
-	{
-		cam_dv = sub(sub(cam_dv, scale(w.cam.rr, dt*10000.0f)), scale(w.cam.v, dt*0.1f));
-		w.cam.v = add(w.cam.v, cam_dv);
-		w.cam.rr = add(scale(cam_dv, dt/2), add(w.cam.rr, scale(w.cam.v, dt)));
 		w.cam.r = add(add(w.plr.r, scale(w.mousePos, 0.3f)), w.cam.rr);
 	}
 }

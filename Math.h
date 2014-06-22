@@ -17,6 +17,15 @@ public:
 		data[1] = y;
 	}
 
+	bool operator==(vec<type, d> a){
+		for(int i = 0; i < d; i++){
+			if(data[i] != a.data[i]){
+				return false;
+			}
+		}
+		return true;
+	}
+
 	type& operator[](int a){
 		return data[a];
 	}
@@ -81,11 +90,25 @@ type dotMe(vec<type, d> a){
 	return dot(a, a);
 }
 
+template<class type, unsigned d>
+type abs(vec<type, d> a){
+	return sqrt(dot(a, a));
+}
+
 template<class type>
 type dot(vec<type, 4> a, vec<type, 4> b){
 	return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
 }
 
+template<class type, int d>
+vec<type, d> proj(vec<type, d> a, vec<type, d> b){
+	return scale(b, dot(a, b)/dot(b, b));
+}
+
+template<class type, int d>
+type projAbs(vec<type, d> a, vec<type, d> b){
+	return dot(a, b)/abs(b);
+}
 
 template<class type>
 vec<type, 2> scale(vec<type, 2> v, float s){

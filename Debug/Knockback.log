@@ -1,4 +1,4 @@
-﻿Build started 6/20/2014 5:08:32 PM.
+﻿Build started 6/21/2014 10:20:50 PM.
      1>Project "C:\Users\Kyler\Programing Stuffs\Knockback\Knockback\Knockback.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Knockback.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -23,4 +23,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.13
+Time Elapsed 00:00:01.43
