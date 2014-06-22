@@ -131,24 +131,30 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 	{//x = e^(-gamma*t)*A*cos(omega*t + theta) //damped shm //consistaint under different frame rates
 		const float omega = 100.0f;
 		const float gamma = 20.0f;
-		/*
-		float2 oscDir;
-		if(w.cam.rr == float2(0.0f, 0.0f)){
-			oscDir = normalize(w.cam.v);
-		}
-		else {
-			oscDir = normalize(w.cam.rr);
-		}
-		float x = dot(w.cam.rr, oscDir);
-		float v = dot(w.cam.v, oscDir);
-		float theta = atan2(-v-x*gamma, omega*x);
-		float A = sqrt(pow(x, 2) + pow((v+x*gamma)/omega, 2));//by math, not by cons. of energy; A != the undampened amplitude
-		x = exp(-gamma*dt)*A*cos(omega*dt+theta);
-		v = -x*gamma -exp(-gamma*dt)*omega*A*sin(omega*dt+theta);
-		w.cam.rr = scale(oscDir, x);
-		w.cam.v = scale(oscDir, v);
+		/*do{
+			float2 oscDir;
+			if(w.cam.rr == float2(0.0f, 0.0f)){
+				if(w.cam.v == float2(0.0f, 0.0f)){
+					break;
+				}
+				else{
+					oscDir = normalize(w.cam.v);
+				}
+			}
+			else {
+				oscDir = normalize(w.cam.rr);
+			}
+			float x = dot(w.cam.rr, oscDir);
+			float v = dot(w.cam.v, oscDir);
+			float theta = atan2(-v-x*gamma, omega*x);
+			float A = sqrt(pow(x, 2) + pow((v+x*gamma)/omega, 2));//by math, not by cons. of energy; A != the undampened amplitude
+			x = exp(-gamma*dt)*A*cos(omega*dt+theta);
+			v = -x*gamma -exp(-gamma*dt)*omega*A*sin(omega*dt+theta);
+			w.cam.rr = add(scale(oscDir, x), proj(w.cam.rr, perp(oscDir)));
+			w.cam.v = add(scale(oscDir, v), proj(w.cam.v, perp(oscDir)));
+		}while(0);
 		*/
-		for(int i = 0; i < 2; i++){
+		for(int i = 0; i < 2; i++){//having each axis "springed" separatly feels better than a single sprin attached to the center
 			float x = w.cam.rr[i];
 			float v = w.cam.v[i];
 			float theta = atan2(-v-x*gamma, omega*x);
@@ -158,7 +164,7 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 			w.cam.rr[i] = x;
 			w.cam.v[i] = v;
 		}
-
+		
 		w.cam.r = add(add(w.plr.r, scale(w.mousePos, 0.3f)), w.cam.rr);
 	}
 }
