@@ -16,6 +16,24 @@ float round(float a){
 	return out;
 }
 
+
+float clamp(float a, float min, float max){
+	if(a < min){
+		return min;
+	}
+	if(a > max){
+		return max;
+	}
+	return a;
+}
+
+float bClamp(float a, float min){
+	if(a < min){
+		return min;
+	}
+	return a;
+}
+
 float random(){
 	return ((float)(rand()%(1<<8)))/((float)(1<<8));
 }

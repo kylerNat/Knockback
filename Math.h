@@ -131,4 +131,8 @@ mat<type, r, r> multiply(mat<type, c, r> a, mat<type, r, c> b){
 
 float round(float a);
 
+float clamp(float a, float min, float max);
+
+float bClamp(float a, float min);
+
 float random();
