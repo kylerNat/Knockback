@@ -1,5 +1,12 @@
 #include "Math.h"
 
+float normalize(float a){
+	if(a >= 0.0f){
+		return 1.0f;
+	}
+	return -1.0f;
+}
+
 float round(float a){
 	float out = floor(a);
 	for(unsigned i = 0; i < 1000; i++){
@@ -22,6 +29,16 @@ float clamp(float a, float min, float max){
 		return min;
 	}
 	if(a > max){
+		return max;
+	}
+	return a;
+}
+
+int clamp(int a, int min, int max){
+	if(a < min){
+		return min;
+	}
+	if(a >= max){
 		return max;
 	}
 	return a;

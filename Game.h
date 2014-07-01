@@ -7,11 +7,23 @@
 #include <GL/glew.h>
 #include <time.h>
 
-#define particle \
-	float m;\
-	float2 r;\
-	float2 v;\
-	float2 dir;
+#define renderArgs vOs, trans
+
+const float block_scale = 0.2;
+const float block_margin = 0.01f;
+
+const int maps[1][10][10] = {
+	1,1,1,1,0,1,1,1,1,1,
+	1,0,1,0,0,1,0,1,0,1,
+	1,0,1,0,0,0,1,0,0,1,
+	1,0,0,0,0,0,0,0,0,1,
+	1,1,1,0,0,0,0,0,0,1,
+	1,0,0,0,0,0,0,0,0,1,
+	1,0,0,0,0,0,0,0,0,1,
+	1,0,0,0,0,0,0,0,0,1,
+	1,0,0,0,0,0,0,0,0,1,
+	1,1,1,1,0,1,1,1,1,1,
+};
 
 struct body{
 	float m;
@@ -23,7 +35,11 @@ struct body{
 };
 
 struct player{
-	particle
+	float m;
+	float2 r;
+	float2 v;
+	float2 dir;
+	float2 dv;
 };
 
 struct weapon{
@@ -47,11 +63,22 @@ struct camera{
 	float2 v;
 };
 
+struct map{
+	unsigned id;
+	float m;
+	float2 r;
+	float2 v;
+	float I;
+	float theta;
+	float omega;
+};
+
 struct world{
 	float2 mousePos;
 	camera cam;
+	map m;
 	player plr;
-	bullet bs[1000];
+	bullet bs[500];
 	weapon gun;
 };
 

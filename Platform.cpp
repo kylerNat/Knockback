@@ -362,8 +362,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		glViewport(0, 0, resolution[0], resolution[1]);
 	}
 
+	//probably should move this to RenderingStructs
 	vertexObject vOs[] = {
 		createVO(modelData()),
+		createVO(files::getVertexData("models/wall.ply")),
 		createVO(files::getVertexData("models/crosshair.ply")),
 		createVO(files::getVertexData("models/person.ply")),
 		createVO(files::getVertexData("models/bullet.ply")),
@@ -381,7 +383,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	world w = createWorld();
 
 	MSG msg;
-	
+
+	float left_over_time = 0.0;
+	float old_dt = 0.0;
+
 	do {
 		if(input::pressed('O')){
 			wglSwapIntervalEXT(1);
@@ -390,12 +395,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			wglSwapIntervalEXT(0);
 		}
 
-		QueryPerformanceCounter(&curTime);
-		unsigned loops = 1;
+		const float frametime = 1.0f/300.0f;
 		
-		float dt = (float)(curTime.QuadPart - oldTime.QuadPart)/(float)(frq.QuadPart*loops);
-		for(unsigned i = 0; i < loops; i++){
-			worldLoop(w, dt);
+		QueryPerformanceCounter(&curTime);
+		float dt = (float)(curTime.QuadPart - oldTime.QuadPart)/(float)(frq.QuadPart);
+
+		left_over_time += dt;
+
+		if(dt-old_dt > frametime*4.0){
+			left_over_time = frametime*4.0f;
+		}
+
+		old_dt = dt;
+
+		for(; left_over_time >= 0.0; left_over_time -= frametime){
+			worldLoop(w, frametime);
 		}
 		oldTime = curTime;
 
@@ -406,10 +420,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 			glUseProgram(program);
 			GLuint trans = glGetUniformLocation(program, "t");
-
-			//<temp>
-			renderObject(scale(w.cam.r, -1.0), float2(10000.0, 0.0), modId_crosshair, vOs, trans);
-			//<\temp>
 
 			renderWorld(w, vOs, trans);
 

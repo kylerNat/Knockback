@@ -9,7 +9,8 @@ namespace files{
 	#endif
 
 	const char * getString(const char * filename){
-		FILE * file = fopen(filename, "rb");
+		FILE * file;
+		fopen_s(&file, filename, "rb");
 
 		//get length
 		struct stat file_stats;
@@ -30,7 +31,8 @@ namespace files{
 		size_t nFaces = 0;
 		modelData out;
 
-		FILE * file = fopen(filename, "r");
+		FILE * file;
+		fopen_s(&file, filename, "r");
 		if(file == 0){
 			return out;
 		}

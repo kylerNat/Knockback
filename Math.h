@@ -85,6 +85,11 @@ type dot(vec<type, 2> a, vec<type, 2> b){
 	return a[0]*b[0] + a[1]*b[1];
 }
 
+template<class type>
+vec<type, 2> complexx(vec<type, 2> a, vec<type, 2> b){
+	return float2(a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]);
+}
+
 template<class type, unsigned d>
 type dotMe(vec<type, d> a){
 	return dot(a, a);
@@ -129,9 +134,13 @@ mat<type, r, r> multiply(mat<type, c, r> a, mat<type, r, c> b){
 	return out;
 }
 
+float normalize(float a);
+
 float round(float a);
 
 float clamp(float a, float min, float max);
+
+int clamp(int a, int min, int max);
 
 float bClamp(float a, float min);
 
