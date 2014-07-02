@@ -14,5 +14,8 @@ void main() {
 	gl_Position = gl_Position*t;
 
 	pos = p;
+	if(abs(t[1][0]) < 2.0){
+		pos = vec3(0.0, 0.0, 0.0);
+	}
 	color = c;
 }

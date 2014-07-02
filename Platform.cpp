@@ -215,7 +215,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			className,//the class name
 			"The... TITLE!",//The title
 			(fullscreen ? WS_POPUP : WS_OVERLAPPEDWINDOW) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-			0, 0, resolution[0], resolution[1],//position and size
+			460, 100, resolution[0], resolution[1],//position and size
 			0, 0, hInstance, 0
 		);
 		if(hwnd == 0) {
@@ -420,6 +420,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 			glUseProgram(program);
 			GLuint trans = glGetUniformLocation(program, "t");
+			
+			//<temp>
+			renderObject(scale(w.cam.r, -1.0), float2(10000.0, 0.0), modId_wall, vOs, trans);
+			//<\temp>
 
 			renderWorld(w, vOs, trans);
 

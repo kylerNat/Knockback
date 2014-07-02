@@ -54,3 +54,7 @@ float bClamp(float a, float min){
 float random(){
 	return ((float)(rand()%(1<<8)))/((float)(1<<8));
 }
+
+float sq(float a){
+	return a*a;
+}

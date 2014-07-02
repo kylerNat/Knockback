@@ -86,6 +86,11 @@ type dot(vec<type, 2> a, vec<type, 2> b){
 }
 
 template<class type>
+type cross(vec<type, 2> a, vec<type, 2> b){
+	return a[0]*b[1]-a[1]*b[0];
+}
+
+template<class type>
 vec<type, 2> complexx(vec<type, 2> a, vec<type, 2> b){
 	return float2(a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]);
 }
@@ -145,3 +150,5 @@ int clamp(int a, int min, int max);
 float bClamp(float a, float min);
 
 float random();
+
+float sq(float a);
