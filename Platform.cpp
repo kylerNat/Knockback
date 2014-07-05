@@ -395,7 +395,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			wglSwapIntervalEXT(0);
 		}
 
-		const float frametime = 1.0f/300.0f;
+		const float frametime = 1.0f/125.0f;
 		
 		QueryPerformanceCounter(&curTime);
 		float dt = (float)(curTime.QuadPart - oldTime.QuadPart)/(float)(frq.QuadPart);
