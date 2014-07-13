@@ -18,6 +18,7 @@ struct vertexObject{
 
 typedef enum{
 	modId_none,
+	modId_floor,
 	modId_wall,
 	modId_crosshair,
 	modId_player,

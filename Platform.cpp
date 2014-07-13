@@ -352,7 +352,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		//endfrom
 
-		wglSwapIntervalEXT(1);//TODO: temp
+		wglSwapIntervalEXT(0);//TODO: temp
 		
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
@@ -365,6 +365,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//probably should move this to RenderingStructs
 	vertexObject vOs[] = {
 		createVO(modelData()),
+		createVO(files::getVertexData("models/wall0.ply")),
 		createVO(files::getVertexData("models/wall.ply")),
 		createVO(files::getVertexData("models/crosshair.ply")),
 		createVO(files::getVertexData("models/person.ply")),
@@ -414,7 +415,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		oldTime = curTime;
 
 		{//render stuff
-			glClearColor(0.7f, 0.8f, 1.0f, 1.0f);
+			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 			glClearDepth(1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -422,7 +423,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			GLuint trans = glGetUniformLocation(program, "t");
 			
 			//<temp>
-			renderObject(scale(w.cam.r, -1.0), float2(10000.0, 0.0), modId_wall, vOs, trans);
+			//renderObject(scale(w.cam.r, -1.0), float2(10000.0, 0.0), modId_wall, vOs, trans);
 			//<\temp>
 
 			renderWorld(w, vOs, trans);

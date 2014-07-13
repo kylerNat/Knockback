@@ -38,12 +38,12 @@ void renderObject(float2 pos, float2 dir, modId model, vertexObject * vOs, GLuin
 	glBindVertexArray(0);
 }
 
-void renderWorld(world w, vertexObject * vOs, GLuint trans){
+void renderWorld(world &/*temp*/ w, vertexObject * vOs, GLuint trans){
 	renderObject(sub(w.plr.r, w.cam.r), w.plr.dir, modId_player, renderArgs);
 	
 	for(int i = 0; i < sizeof(w.bs)/sizeof(w.bs[0]); i++){
-		if(w.bs[i].alive){
-			renderObject(sub(w.bs[i].r, w.cam.r), scale(normalize(w.bs[i].v), 0.75), modId_bullet, renderArgs);
+		if(w.bs[i].alive > 0.0f){
+			renderObject(sub(w.bs[i].r, w.cam.r), scale(w.bs[i].dir, 0.75), modId_bullet, renderArgs);
 		}
 	}
 
@@ -54,10 +54,18 @@ void renderWorld(world w, vertexObject * vOs, GLuint trans){
 
 	for(int x = -(map_size_x-1)/2; x < map_size_x+(map_size_x-1)/2; x++){
 		for(int y = -(map_size_y-1)/2; y < map_size_y+(map_size_y-1)/2; y++){
-			renderObject(sub(add(w.m.r, complexx(float2(x*block_scale, y*block_scale), float2(cos(w.m.theta), -sin(w.m.theta)))), w.cam.r), float2(sin(w.m.theta)*(block_scale+block_margin), cos(w.m.theta)*(block_scale+block_margin)), (modId) map_s(w.m.id, x, y), renderArgs);
+			renderObject(sub(add(w.m.r, complexx(float2(x*block_scale, y*block_scale), float2(cos(w.m.theta), -sin(w.m.theta)))), w.cam.r), float2(sin(w.m.theta)*(block_scale+block_margin), cos(w.m.theta)*(block_scale+block_margin)), (modId) (map_s(w.m.id, x, y)+modId_floor), renderArgs);
 		}
 	}
 
+	for(int i = 0; i < sizeof(w.debug_ms)/sizeof(w.debug_ms[0]); i++){
+		if(w.debug_ms[i][1] > 1000000.0f){
+			continue;
+		}
+		renderObject(sub(w.debug_ms[i], w.cam.r), float2(0.0f, 1.0f), modId_crosshair, renderArgs);
+	}
+	renderObject(sub(w.debug_marker, w.cam.r), float2(0.0f, 1.0f), modId_bullet, renderArgs);
+	
 	renderObject(w.mousePos, float2(0.0f, 1.0f), modId_crosshair, renderArgs);
 }
 
@@ -69,8 +77,10 @@ world createWorld(){//make constuctor?
 	w.m.r = float2(-0.0, -0.0);
 	w.m.theta = 0.0;
 	w.m.omega = 0.0;
-	w.m.m = 100.0;
-	w.m.I = 100.0;
+	w.m.m = 50.0;
+	w.m.I = 25.0;
+
+	w.plr.health = 1;
 
 	/*
 	w.gun.fireWait = 0.0015f;
@@ -78,10 +88,9 @@ world createWorld(){//make constuctor?
 	w.gun.offset = float2(0.1f, 0.0f);
 	*/
 	
-	w.gun.fireWait = 0.1f;
+	w.gun.fireWait = 0.05f;
 	w.gun.spread = 0.05f;
-	w.gun.offset = float2(0.1f, 0.0f);
-	
+	w.gun.offset = float2(0.05f, 0.0f);
 
 	w.plr.m = 1.0;
 	return w;
@@ -101,7 +110,33 @@ void collideWall(float2 r_c, float2 n, world & w, float m, float2 & r, float2 & 
 	w.m.omega += Jxr*w.m.m*v_b/w.m.I;
 }
 
-bool collideMap(world & w, float m, float2 & r, float2 & v, float radius){//TODO: add corner checking
+bool touchingBlock(world w, float2 r, float radius, int id){
+	float2 r_t = complexx(scale(sub(r, w.m.r), 1.0f/block_scale), float2(cos(w.m.theta), sin(w.m.theta)));//transform the particle from the world space to map space
+	int x = (int)round(r_t[0]);
+	int y = (int)round(r_t[1]);
+
+	radius = radius/block_scale;
+	float2 r_t_f = r_t;//in the map space
+	float2 r_c = r_t;
+	if(map_s(w.m.id, x, y) == id){
+		return true;
+	}
+
+	float2 corner_dir = float2(0.5f*normalize(r_t[0]-x), 0.5f*normalize(r_t[1]-y));
+	if(abs(sub(r_t, add(float2(x, y), corner_dir))) <= radius && map_s(w.m.id, x+normalize(r_t[0]-x), y+normalize(r_t[1]-y)) == id){
+		return true;
+	}
+
+	if(abs(r_t[0]-x)+radius >= 0.5 && map_s(w.m.id, x+normalize(r_t[0]-x), y) == id){
+		return true;
+	}
+	if(abs(r_t[1]-y)+radius >= 0.5 && map_s(w.m.id, x, y+normalize(r_t[1]-y)) == id){
+		return true;
+	}
+	return false;
+}
+
+bool collideMap(world & w, float m, float2 & r, float2 & v, float radius){
 	bool collision = false;
 	
 	float2 r_t = complexx(scale(sub(r, w.m.r), 1.0f/block_scale), float2(cos(w.m.theta), sin(w.m.theta)));//transform the particle from the world space to map space
@@ -113,9 +148,42 @@ bool collideMap(world & w, float m, float2 & r, float2 & v, float radius){//TODO
 	//	return;
 	//}
 	radius = radius/block_scale;
-	float2 r_t_f = r_t;//in the map space
-	float2 r_c = r_t;
-	if(map_s(w.m.id, x, y) == 1){
+	/*if(map_s(w.m.id, x, y) == 1){
+		//push to the nearest empty neighbor
+		float d;
+		float d_nearest = abs(0.5-radius+(r_t[0] - x));
+		int nearest = 0;
+		d = abs(0.5-radius-(r_t[0] - x));
+		if(map_s(w.m.id, x+1, y) == 0 && d < d_nearest){
+			d_nearest = d;
+			nearest = 2;
+		}
+		d = abs(0.5-radius+(r_t[1] - y));
+		if(map_s(w.m.id, x, y-1) == 0 && d < d_nearest){
+			d_nearest = d;
+			nearest = 1;
+		}
+		d = abs(0.5-radius-(r_t[1] - y));
+		if(map_s(w.m.id, x, y+1) == 0 && d < d_nearest){
+			d_nearest = d;
+			nearest = 3;
+		}
+		switch(nearest){
+			case 0:
+				r_t[0] -= 0.5;
+			break;
+			case 2:
+				r_t[0] += 0.5;
+			case 1:
+				r_t[1] -= 0.5;
+				r_t[1] = y-1;
+			break;
+			case 3:
+				r_t[1] += 0.5;
+				r_t[1] = y+1;
+			break;
+		}
+		/*
 		if(map_s(w.m.id, y, x-1) == 1){//abs(r_t[0]-x) < abs(r_t[1]-y)){//TODO: use somthing else(maybe velocity?) to figure out which side to use?
 			r_c = float2(r_t[0], y+(r_t[1] > y ? 0.5f : -0.5f));
 			r_t_f = float2(r_t[0], y+(r_t[1] > y ? 0.5f+radius : -0.5f-radius));
@@ -133,8 +201,10 @@ bool collideMap(world & w, float m, float2 & r, float2 & v, float radius){//TODO
 				collision = true;
 			}
 		}
-	}
-
+		*/
+	//}
+	float2 r_t_f = r_t;//in the map space
+	float2 r_c = r_t;
 	float v_b;
 
 	float2 corner_dir = float2(0.5f*normalize(r_t[0]-x), 0.5f*normalize(r_t[1]-y));
@@ -147,26 +217,11 @@ bool collideMap(world & w, float m, float2 & r, float2 & v, float radius){//TODO
 		}
 	}
 
-	if(abs(r_t[0]-x)+radius >= 0.5 && map_s(w.m.id, x+normalize(r_t[0]-x), y) == 1){//TODO: put the physics stuff in a seperate function
+	if(abs(r_t[0]-x)+radius >= 0.5 && map_s(w.m.id, x+normalize(r_t[0]-x), y) == 1){
 		r_c[0] = x-normalize(x-r_t[0])*0.5;
 		r_t_f[0] = x-normalize(x-r_t[0])*(0.5-radius);
 		if(v_t[0]*normalize(x-r_t[0]) < 0.0){
 			collideWall(r_c, float2(block_scale, 0.0f), w, m, r, v);
-			/*
-			
-			float Jxr = cross(float2(block_scale, 0.0f), r_c);
-			v_b =
-				(2.0f*(v_t[0] - Jxr*w.m.omega))/
-				(1.0f + sq(Jxr)*w.m.m/w.m.I + w.m.m/m);
-
-			float2 m_dir = float2(cos(w.m.theta), -sin(w.m.theta));
-
-			v = add(v, scale(m_dir,  -w.m.m/m*v_b));
-			w.m.v = add(w.m.v, scale(m_dir, v_b));
-			w.m.omega += Jxr*w.m.m*v_b/w.m.I;
-			
-			//v = sub(v, scale(proj(v, float2(cos(w.m.theta), -sin(w.m.theta))), 2.0));
-			*/
 			collision = true;
 		}
 	}
@@ -175,19 +230,6 @@ bool collideMap(world & w, float m, float2 & r, float2 & v, float radius){//TODO
 		r_t_f[1] = y-normalize(y-r_t[1])*(0.5-radius);
 		if(v_t[1]*normalize(y-r_t[1]) < 0.0){
 			collideWall(r_c, float2(0.0f, -block_scale), w, m, r, v);
-			/**float Jxr = cross(float2(0.0f, block_scale), r_c);
-			v_b =
-				(2.0f*(v_t[1] - Jxr*w.m.omega))/
-				(1.0f + sq(Jxr)*w.m.m/w.m.I + w.m.m/m);
-
-			float2 m_dir = float2(sin(w.m.theta), cos(w.m.theta));
-
-			v = add(v, scale(m_dir,  -w.m.m/m*v_b));
-			w.m.v = add(w.m.v, scale(m_dir, v_b));
-			w.m.omega += Jxr*w.m.m*v_b/w.m.I;
-			
-			//v = sub(v, scale(proj(v, float2(sin(w.m.theta), cos(w.m.theta))), 2.0));
-			*/
 			collision = true;
 		}
 	}
@@ -196,106 +238,167 @@ bool collideMap(world & w, float m, float2 & r, float2 & v, float radius){//TODO
 	return collision;
 }
 
+bool intersectsLine(world & w, float2 r0, float2 r1) {
+	int temp = 0;
+	for(int i = 0; i < sizeof(w.debug_ms)/sizeof(w.debug_ms[0]); i++){
+		if(w.debug_ms[i][1] > 1000000.0f){
+			continue;
+		}
+		w.debug_ms[i] = float2(0.0, 100000000.0f);
+	}
+
+	float2 rt0 = complexx(scale(sub(r0, w.m.r), 1.0f/block_scale), float2(cos(w.m.theta), sin(w.m.theta)));//transform the particle from the world space to map space
+	
+	float2 rt1 = complexx(scale(sub(r1, w.m.r), 1.0f/block_scale), float2(cos(w.m.theta), sin(w.m.theta)));//transform the particle from the world space to map space
+	
+	w.debug_ms[temp++] = add(complexx(scale(rt0, block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
+	
+	w.debug_ms[temp++] = add(complexx(scale(rt1, block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
+
+	float2 r01 = sub(rt1, rt0);
+	/*
+		y(x) = rt0[1]+r01[1]*sub(rt0[0], x)/r01[0];
+	*/
+	for(int x = round(rt0[0])+normalize(r01[0]); x*normalize(r01[0]) <= round(rt1[0])*normalize(r01[0]); x += normalize(r01[0])){//TODO: check rounding
+		float y = rt0[1]+r01[1]*(x-0.5f*normalize(r01[0])-rt0[0])/r01[0];
+		w.debug_ms[temp++] = add(complexx(scale(float2(x-0.5*normalize(r01[0]), y), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
+		if(map_s(w.m.id, x, round(y)) == 1){
+			w.debug_marker = add(complexx(scale(float2(x-0.5*normalize(r01[0]), y), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
+			return true;
+		}
+	}
+
+	for(int y = round(rt0[1])+normalize(r01[1]); y*normalize(r01[1]) <= round(rt1[1])*normalize(r01[1]); y += normalize(r01[1])){//TODO: check rounding
+		float x = rt0[0]+r01[0]*(y-0.5f*normalize(r01[1])-rt0[1])/r01[1];
+		w.debug_ms[temp++] = add(complexx(scale(float2(x, y-0.5*normalize(r01[1])), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
+		if(map_s(w.m.id, round(x), y) == 1){
+			w.debug_marker = add(complexx(scale(float2(x, y-0.5*normalize(r01[1])), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
+			return true;
+		}
+	}
+
+	/*for(int y = floor(rt0[1]); y <= round(rt1[1]); y++){
+		float x = rt0[0]+r01[0]*(y+0.5f-rt0[1])/r01[1];
+		w.debug_ms[temp++] = add(complexx(scale(float2(round(x), y+0.5), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
+		if(map_s(w.m.id, round(x), y) == 1){
+			w.debug_marker = add(complexx(scale(float2(x, y+0.5), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
+			return true;
+		}
+	}*/
+	w.debug_marker = float2(0.0, 100000.0);
+	return false;
+}
+
 //TODO: set accelerations first, then update velocities and positions, otherwise some objects are unsyncronized, which causes problems at low framerates or high speeds
 void worldLoop(world & w, float dt){//make member function for convinience?
 	w.mousePos = float2(1.0f/(1.0f*500.0f)*input::mouse[0], -1.0f/(1.0f*500.0f)*input::mouse[1]);
 	//float2 plr_dv = float2(0.0, 0.0);
-	
-	{
-		w.m.theta += dt*w.m.omega;
-		w.m.r = add(w.m.r, scale(w.m.v, dt));
-		w.m.v = sub(w.m.v, scale(w.m.v, dt*1.0f));
-		w.m.omega -= w.m.omega*dt*1.0f;
-	}
 
-	{
+	if(w.plr.health > 0){
 		float2 inDir = float2(
 			-1.0f*float(input::pressed('A')) + 1.0f*float(input::pressed('D')),
 			-1.0f*float(input::pressed('S')) + 1.0f*float(input::pressed('W'))
 		);
 
-		float speed = 1.5f;
-		if(input::pressed(VK_SHIFT)){
-			speed = 50.0f;
-		}
+		inDir = normalize(inDir);
 
-		inDir = scale(normalize(inDir), speed);
-		const float aMag = 50.0f;
-		const float drag = 25.0f;
-		float2 velDif = sub(inDir, w.plr.v);
-		w.plr.dv = add(w.plr.dv, scale(sub(w.plr.v, w.m.v), -drag*dt));
-		if(inDir[0] != 0.0f || inDir[1] != 0.0f){
-			if(dotMe(sub(velDif, w.plr.dv)) >= pow(aMag*dt, 2)){
-				w.plr.dv = add(scale(normalize(velDif), aMag*dt), w.plr.dv);
-				//w.plr.v = add(w.plr.v, w.plr.dv);
-			}
-			else{
-				w.plr.dv = velDif;		
-				//w.plr.v = add(w.plr.v, plrAccel);
-				//w.plr.v = inDir;
-			}
-		}
-		w.m.v = add(w.m.v, scale(w.plr.dv, -w.plr.m/w.m.m));
+		float foot_speed = 2.0f;
+		float drag_const = 5.0f;
+
+		float2 v_feet = add(scale(inDir, -foot_speed), w.plr.v);
+		float2 J_drag = scale(sub(v_feet, add(w.m.v, scale(perp(sub(w.m.r, w.plr.r)), w.m.omega))), -drag_const*dt);
+		w.plr.dv = scale(J_drag, 1.0f/w.plr.m);
+
+		w.m.dv = add(w.m.dv, scale(J_drag, -1.0f/w.m.m));
+		w.m.omega += cross(J_drag, sub(w.m.r, w.plr.r))/w.m.I;
 		w.plr.r = add(scale(w.plr.dv, dt/2), add(w.plr.r, scale(w.plr.v, dt)));
 		w.plr.v = add(w.plr.v, w.plr.dv);
 
-		//w.cam.r = add(w.plr.r, scale(w.mousePos, 0.3f));
 		w.plr.dir = normalize(w.mousePos);
 		w.plr.dv = float2(0.0, 0.0);
 		collideMap(w, w.plr.m, w.plr.r, w.plr.v, 0.05f);
+		if(touchingBlock(w, w.plr.r, 0.05f, 2)){
+			w.plr.health = 0;
+		}
 	}
 
-	for(int i = 0; false && i < sizeof(w.es)/sizeof(w.es[0]); i++){
-		float2 inDir = normalize(sub(w.plr.r, w.es[i].r));
+	for(int i = 0; i < sizeof(w.es)/sizeof(w.es[0]); i++){
+		if(w.es[i].health > 0){
+			float2 inDir = normalize(sub(w.plr.r, w.es[i].r));
 
-		float speed = 1.5f;
+			if(intersectsLine(w, w.es[i].r, w.plr.r)){
+			//	inDir = scale(inDir, -1.0f);
+			}
+			break;
+			float foot_speed = 1.5f;
+			float drag_const = 1.0f;
 
-		float2 v_w = scale(inDir, speed);
-		const float aMag = 40.0f;
-		const float drag = 25.0f;
-		float2 velDif = sub(v_w, w.es[i].v);
-		w.es[i].dv = add(w.es[i].dv, scale(w.es[i].v, -drag*dt));
-		if(dotMe(sub(velDif, w.es[i].dv)) >= pow(aMag*dt, 2)){
-			w.es[i].dv = add(scale(normalize(velDif), aMag*dt), w.es[i].dv);
+			float2 v_feet = add(scale(inDir, -foot_speed), w.es[i].v);
+			float2 J_drag = scale(sub(v_feet, add(w.m.v, scale(perp(sub(w.m.r, w.es[i].r)), w.m.omega))), -drag_const*dt);
+			w.es[i].dv = scale(J_drag, 1.0f/w.es[i].m);
+
+			w.m.dv = add(w.m.dv, scale(J_drag, -1.0f/w.m.m));
+			w.m.omega += cross(J_drag, sub(w.m.r, w.es[i].r))/w.m.I;
+			w.es[i].r = add(scale(w.es[i].dv, dt/2), add(w.es[i].r, scale(w.es[i].v, dt)));
+			w.es[i].v = add(w.es[i].v, w.es[i].dv);
+
+			w.es[i].dir = inDir;
+			w.es[i].dv = float2(0.0, 0.0);
+			collideMap(w, w.es[i].m, w.es[i].r, w.es[i].v, 0.05f);
+			
+			if(dotMe(sub(w.plr.r, w.es[i].r)) < sq(0.1)){
+				w.plr.health -= 1;
+			}
+
+			for(int b = 0; b < sizeof(w.bs)/sizeof(w.bs[0]); b++){
+				if(w.bs[b].alive > 0.0f){
+					if(dotMe(sub(w.bs[b].r, w.es[i].r)) < sq(0.1)){
+						w.es[i].health -= 1;
+						w.bs[b].alive = 0.0;
+					}
+				}
+			}
 		}
-		else{
-			w.es[i].dv = velDif;	
-		}
-		w.es[i].r = add(scale(w.es[i].dv, dt/2), add(w.es[i].r, scale(w.es[i].v, dt)));
-		w.es[i].v = add(w.es[i].v, w.es[i].dv);
-
-		//w.cam.r = add(w.plr.r, scale(w.mousePos, 0.3f));
-		//w.es[i].dir = inDir;
-		w.es[i].dv = float2(0.0, 0.0);
-		collideMap(w, 1.0f, w.es[i].r, w.es[i].v, 0.05f);
+	}
+	
+	{
+		w.m.theta += dt*w.m.omega;
+		w.m.dv = sub(w.m.dv, scale(w.m.v, dt*1.0f));
+		w.m.omega -= w.m.omega*dt*1.0f;
+		w.m.r = add(scale(w.m.dv, dt/2), add(w.m.r, scale(w.m.v, dt)));
+		w.m.v = add(w.m.v, w.m.dv);
+		w.m.dv = float2(0.0f, 0.0f);
 	}
 
 	for(int i = 0; i < sizeof(w.bs)/sizeof(w.bs[0]); i++){
-		auto a = w.bs[i];
-		if(w.bs[i].alive > 0){
+		if(w.bs[i].alive > 0.0f){
 			w.bs[i].r = add(w.bs[i].r, scale(w.bs[i].v, dt));
 			if(dotMe(sub(w.bs[i].r, w.plr.r)) > 10.0){
-				w.bs[i].alive = 0;
+				w.bs[i].alive = 0.0f;
 			}
 
-			if(collideMap(w, 0.5, w.bs[i].r, w.bs[i].v, 0.05f)){
-				w.bs[i].alive -= 1;
+			if(collideMap(w, 0.2, w.bs[i].r, w.bs[i].v, 0.05f)){
+				w.bs[i].dir = normalize(w.bs[i].v);
+				w.bs[i].alive = 0.25f;
 			}
+			w.bs[i].alive -= dt;
 		}
 	}
 
-	if(input::pressed(VK_LBUTTON)){
+	if(input::pressed(VK_LBUTTON)){//TODO stop bullets from spawning in walls
+		//w.plr.v = sub(w.plr.v, scale(w.plr.dir, 2.0f*dt));
 		for(int i = 0; i < sizeof(w.bs)/sizeof(w.bs[0]) && w.gun.fireTimer <= 0.0; i++){
-			if(!w.bs[i].alive){
-				w.bs[i].alive = 10;
+			if(w.bs[i].alive <= 0.0f){
+				w.bs[i].alive = 3.0f;
 				w.bs[i].r = add(add(w.plr.r, scale(perp(w.plr.dir), -w.gun.offset[1])), scale(w.plr.dir, w.gun.offset[0]));
 				float2 randF2 = normalize(float2(2.0f*(random()-0.5f), 2.0f*(random()-0.5f)));
 				float theta = atan2(w.plr.dir[0], w.plr.dir[1]);
 				theta += w.gun.spread*2.0f*(random()-0.5f);//TODO: make gaussian distrobution
 				float2 relV = scale(float2(sin(theta), cos(theta)), 1.5);
 				w.bs[i].v = add(relV, w.plr.v);
+				w.bs[i].dir = w.plr.dir;
 
-				w.plr.v = sub(w.plr.v, scale(w.plr.dir, 0.5f));//sub(w.plr.v, scale(relV, 0.152f));
+				//w.plr.v = sub(w.plr.v, scale(w.plr.dir, 0.2f));//sub(w.plr.v, scale(relV, 0.152f));
 
 				w.cam.v = add(w.cam.v, add(scale(randF2, 1.0f), scale(relV, -0.2f)));
 		
