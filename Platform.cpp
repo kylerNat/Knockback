@@ -330,6 +330,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ClipCursor(&r);
 	
 	GLuint program;
+	GLuint post_program;
 	{//graphics
 		shaderInfo shaderList[2] = {
 			GL_VERTEX_SHADER, files::getString("shaders/Vertex.vert"),
@@ -337,6 +338,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		};
 
 		program = createProgram(shaderList, sizeof(shaderList)/sizeof(shaderList[0]));
+
+		//post proc stuff
+		shaderInfo post_shaderList[2] = {
+			GL_VERTEX_SHADER, files::getString("shaders/VertexPost.vert"),
+			GL_FRAGMENT_SHADER, files::getString("shaders/FragmentPost.frag"),
+		};
+
+		post_program = createProgram(post_shaderList, sizeof(post_shaderList)/sizeof(post_shaderList[0]));
+		//end post proc stuff
 
 		//from http://stackoverflow.com/questions/589064/how-to-enable-vertical-sync-in-opengl
 		PFNWGLSWAPINTERVALEXTPROC       wglSwapIntervalEXT = NULL;
@@ -356,21 +366,75 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LEQUAL);
+		glDepthFunc(GL_GEQUAL);
 		glDepthRange(0.0f, 1.0f);
 		glEnable(GL_DEPTH_CLAMP);
 		glViewport(0, 0, resolution[0], resolution[1]);
 	}
 
+	GLuint vbo_fbo_vertices;
+
+	GLfloat fbo_vertices[] = {
+		-1.0f, -1.0f,
+		 1.0f, -1.0f,
+		-1.0f,  1.0f,
+		 1.0f,  1.0f,
+	};
+			
+	glGenBuffers(1, &vbo_fbo_vertices);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_fbo_vertices);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fbo_vertices), fbo_vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
 	//probably should move this to RenderingStructs
 	vertexObject vOs[] = {
 		createVO(modelData()),
-		createVO(files::getVertexData("models/wall0.ply")),
+		createVO(files::getVertexData("models/floor.ply")),
 		createVO(files::getVertexData("models/wall.ply")),
 		createVO(files::getVertexData("models/crosshair.ply")),
+		createVO(files::getVertexData("models/corpse.ply")),
 		createVO(files::getVertexData("models/person.ply")),
+		createVO(files::getVertexData("models/pirate.ply")),
 		createVO(files::getVertexData("models/bullet.ply")),
+		createVO(files::getVertexData("models/evil_bullet.ply")),
 	};
+
+	//fb stuff
+	GLuint tex;
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, resolution[0], resolution[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	GLuint depth_buffer;
+	glGenRenderbuffers(1, &depth_buffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depth_buffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, resolution[0], resolution[1]);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	GLuint frameBuffer;
+	glGenFramebuffers(1, &frameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0);
+	//glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_buffer, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buffer);
+
+	//glDrawBuffer(0);
+
+	GLenum error = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if(error != GL_FRAMEBUFFER_COMPLETE){
+		fprintf(stderr, "glCheckFramebufferStatus: error %p", error);
+		return -1;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//end fb stuff
 
 	LARGE_INTEGER oldTime;
 	LARGE_INTEGER curTime;
@@ -415,8 +479,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		oldTime = curTime;
 
 		{//render stuff
+			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-			glClearDepth(1.0f);
+			glClearDepth(0.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			glUseProgram(program);
@@ -427,7 +492,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			//<\temp>
 
 			renderWorld(w, vOs, trans);
+			
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+			//draw framebuffer
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClearDepth(0.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glUseProgram(post_program);
+			
+			glBindTexture(GL_TEXTURE_2D, tex);
+			GLuint texture = glGetUniformLocation(post_program, "tex");
+			glUniform1i(texture, 0);
+			
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_fbo_vertices);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 2, GL_FLOAT, 0, 0, 0);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			
 			SwapBuffers(dc);
 		}
 
@@ -437,6 +521,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 
 	} while(msg.message != WM_QUIT);
+	
+	//glDeleteBuffers(1, &vbo_fbo_vertices);
 
 	return msg.wParam;
 }

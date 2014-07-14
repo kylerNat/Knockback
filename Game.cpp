@@ -6,13 +6,19 @@
 */
 
 int map_s(int id, int x, int y){
-	x += (sizeof(maps[0])/sizeof(maps[0][0])-1)/2;
+	x += (map_size_x-1)/2;
 	y = -y;
-	y += ((sizeof(maps[0][0])/sizeof(maps[0][0][0]))-1)/2;
-	if(x < 0 || y < 0 || x >= sizeof(maps[0])/sizeof(maps[0][0])|| y >= sizeof(maps[0][0])/sizeof(maps[0][0][0])){
+	y += (map_size_y-1)/2;
+	if(x < 0 || y < 0 || x >= map_size_x|| y >= map_size_y){
 		return 0;
 	}
-	return maps[id][y][x];
+	return levels[id].walls[y][x];
+}
+
+void loadLevel(world & w, int id){
+	for(int i = 0; i < sizeof(levels[id].ers)/sizeof(levels[id].ers[0]); i++){
+		w.es[i].r = levels[id].ers[i];
+	}
 }
 
 void renderObject(float2 pos, float2 dir, modId model, vertexObject * vOs, GLuint trans){
@@ -39,22 +45,28 @@ void renderObject(float2 pos, float2 dir, modId model, vertexObject * vOs, GLuin
 }
 
 void renderWorld(world &/*temp*/ w, vertexObject * vOs, GLuint trans){
-	renderObject(sub(w.plr.r, w.cam.r), w.plr.dir, modId_player, renderArgs);
+	renderObject(sub(w.plr.r, w.cam.r), w.plr.dir, (w.plr.health > 0.0 ? modId_player : modId_corpse), renderArgs);
 	
 	for(int i = 0; i < sizeof(w.bs)/sizeof(w.bs[0]); i++){
 		if(w.bs[i].alive > 0.0f){
-			renderObject(sub(w.bs[i].r, w.cam.r), scale(w.bs[i].dir, 0.75), modId_bullet, renderArgs);
+			renderObject(sub(w.bs[i].r, w.cam.r), scale(w.bs[i].dir, 0.75), modId(modId_bullet+w.bs[i].evil), renderArgs);
 		}
 	}
 
 	for(int i = 0; i < sizeof(w.es)/sizeof(w.es[0]); i++){
-		renderObject(sub(w.es[i].r, w.cam.r), w.es[i].dir, modId_player, renderArgs);
+		renderObject(sub(w.es[i].r, w.cam.r), w.es[i].dir, (w.es[i].health > 0.0 ? modId_pirate : modId_corpse), renderArgs);
 	}
 
+	for(int x = -(map_size_x-1)/2; x < map_size_x-(map_size_x-1)/2; x++){
+		for(int y = -(map_size_y-1)/2; y < map_size_y-(map_size_y-1)/2; y++){
+			renderObject(sub(add(w.m.r, complexx(float2(x*block_scale+block_margin, y*block_scale), float2(cos(w.m.theta), -sin(w.m.theta)))), w.cam.r), float2(sin(w.m.theta)*block_scale, cos(w.m.theta)*block_scale), (modId) (map_s(w.m.id, x, y)+modId_floor), renderArgs);		
+			renderObject(sub(add(w.m.r, complexx(float2(x*block_scale, y*block_scale+block_margin), float2(cos(w.m.theta), -sin(w.m.theta)))), w.cam.r), float2(sin(w.m.theta)*block_scale, cos(w.m.theta)*block_scale), (modId) (map_s(w.m.id, x, y)+modId_floor), renderArgs);
+		}
+	}
 
-	for(int x = -(map_size_x-1)/2; x < map_size_x+(map_size_x-1)/2; x++){
-		for(int y = -(map_size_y-1)/2; y < map_size_y+(map_size_y-1)/2; y++){
-			renderObject(sub(add(w.m.r, complexx(float2(x*block_scale, y*block_scale), float2(cos(w.m.theta), -sin(w.m.theta)))), w.cam.r), float2(sin(w.m.theta)*(block_scale+block_margin), cos(w.m.theta)*(block_scale+block_margin)), (modId) (map_s(w.m.id, x, y)+modId_floor), renderArgs);
+	for(int x = -(map_size_x-1)/2; x < map_size_x-(map_size_x-1)/2; x++){
+		for(int y = -(map_size_y-1)/2; y < map_size_y-(map_size_y-1)/2; y++){
+			renderObject(sub(add(w.m.r, complexx(float2(x*block_scale, y*block_scale), float2(cos(w.m.theta), -sin(w.m.theta)))), w.cam.r), float2(sin(w.m.theta)*block_scale, cos(w.m.theta)*block_scale), (modId) (map_s(w.m.id, x, y)+modId_floor), renderArgs);
 		}
 	}
 
@@ -74,6 +86,8 @@ world createWorld(){//make constuctor?
 	
 	world w = {0};
 
+	loadLevel(w, 0);
+
 	w.m.r = float2(-0.0, -0.0);
 	w.m.theta = 0.0;
 	w.m.omega = 0.0;
@@ -87,9 +101,9 @@ world createWorld(){//make constuctor?
 	w.gun.spread = 0.5f;
 	w.gun.offset = float2(0.1f, 0.0f);
 	*/
-	
+
 	w.gun.fireWait = 0.05f;
-	w.gun.spread = 0.05f;
+	w.gun.spread = 0.105f;
 	w.gun.offset = float2(0.05f, 0.0f);
 
 	w.plr.m = 1.0;
@@ -239,53 +253,29 @@ bool collideMap(world & w, float m, float2 & r, float2 & v, float radius){
 }
 
 bool intersectsLine(world & w, float2 r0, float2 r1) {
-	int temp = 0;
-	for(int i = 0; i < sizeof(w.debug_ms)/sizeof(w.debug_ms[0]); i++){
-		if(w.debug_ms[i][1] > 1000000.0f){
-			continue;
-		}
-		w.debug_ms[i] = float2(0.0, 100000000.0f);
-	}
-
 	float2 rt0 = complexx(scale(sub(r0, w.m.r), 1.0f/block_scale), float2(cos(w.m.theta), sin(w.m.theta)));//transform the particle from the world space to map space
 	
 	float2 rt1 = complexx(scale(sub(r1, w.m.r), 1.0f/block_scale), float2(cos(w.m.theta), sin(w.m.theta)));//transform the particle from the world space to map space
-	
-	w.debug_ms[temp++] = add(complexx(scale(rt0, block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
-	
-	w.debug_ms[temp++] = add(complexx(scale(rt1, block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
 
 	float2 r01 = sub(rt1, rt0);
 	/*
+		x to y formula
 		y(x) = rt0[1]+r01[1]*sub(rt0[0], x)/r01[0];
 	*/
 	for(int x = round(rt0[0])+normalize(r01[0]); x*normalize(r01[0]) <= round(rt1[0])*normalize(r01[0]); x += normalize(r01[0])){//TODO: check rounding
 		float y = rt0[1]+r01[1]*(x-0.5f*normalize(r01[0])-rt0[0])/r01[0];
-		w.debug_ms[temp++] = add(complexx(scale(float2(x-0.5*normalize(r01[0]), y), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
 		if(map_s(w.m.id, x, round(y)) == 1){
-			w.debug_marker = add(complexx(scale(float2(x-0.5*normalize(r01[0]), y), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
 			return true;
 		}
 	}
 
 	for(int y = round(rt0[1])+normalize(r01[1]); y*normalize(r01[1]) <= round(rt1[1])*normalize(r01[1]); y += normalize(r01[1])){//TODO: check rounding
 		float x = rt0[0]+r01[0]*(y-0.5f*normalize(r01[1])-rt0[1])/r01[1];
-		w.debug_ms[temp++] = add(complexx(scale(float2(x, y-0.5*normalize(r01[1])), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
 		if(map_s(w.m.id, round(x), y) == 1){
-			w.debug_marker = add(complexx(scale(float2(x, y-0.5*normalize(r01[1])), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
 			return true;
 		}
 	}
 
-	/*for(int y = floor(rt0[1]); y <= round(rt1[1]); y++){
-		float x = rt0[0]+r01[0]*(y+0.5f-rt0[1])/r01[1];
-		w.debug_ms[temp++] = add(complexx(scale(float2(round(x), y+0.5), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
-		if(map_s(w.m.id, round(x), y) == 1){
-			w.debug_marker = add(complexx(scale(float2(x, y+0.5), block_scale), float2(cos(w.m.theta), -sin(w.m.theta))), w.m.r);
-			return true;
-		}
-	}*/
-	w.debug_marker = float2(0.0, 100000.0);
 	return false;
 }
 
@@ -322,16 +312,54 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 		}
 	}
 
+	for(int i = 0; i < sizeof(w.debug_ms)/sizeof(w.debug_ms[0]); i++){
+		if(w.debug_ms[i][1] > 1000000.0f){
+			continue;
+		}
+		w.debug_ms[i] = float2(0.0, 100000000.0f);
+	}
+
 	for(int i = 0; i < sizeof(w.es)/sizeof(w.es[0]); i++){
 		if(w.es[i].health > 0){
-			float2 inDir = normalize(sub(w.plr.r, w.es[i].r));
+			float2 inDir = normalize(w.es[i].v);//float2(random()-0.5f, random()-0.5f));// = normalize(sub(w.plr.r, w.es[i].r));
 
-			if(intersectsLine(w, w.es[i].r, w.plr.r)){
-			//	inDir = scale(inDir, -1.0f);
+			if(intersectsLine(w, w.es[i].r, w.plr.r) || dotMe(sub(w.es[i].r, w.plr.r)) > sq(2.0f)){
+				//inDir = normalize(float2(random()-0.5f, random()-0.5f));//scale(inDir, -1.0f);
+			}else{//TODO stop bullets from spawning in walls
+				//w.plr.v = sub(w.plr.v, scale(w.plr.dir, 2.0f*dt));
+				for(int j = 0; j < sizeof(w.bs)/sizeof(w.bs[0]) && w.es[i].fireTimer <= 0.0; j++){
+					if(w.bs[j].alive <= 0.0f){
+						w.bs[j].alive = 3.0f;
+						w.bs[j].r = add(add(w.es[i].r, scale(perp(w.plr.dir), -w.gun.offset[1])), scale(w.es[i].dir, w.gun.offset[0]));
+						float2 randF2 = normalize(float2(2.0f*(random()-0.5f), 2.0f*(random()-0.5f)));
+						float theta = atan2(w.es[i].dir[0], w.es[i].dir[1]);
+						theta += w.gun.spread*2.0f*(random()-0.5f);//TODO: make gaussian distrobution
+						float2 relV = scale(float2(sin(theta), cos(theta)), 0.25);
+						w.bs[j].v = add(relV, w.es[i].v);
+						w.bs[j].dir = w.es[i].dir;
+
+						w.es[i].v = sub(w.es[i].v, scale(w.es[i].dir, 0.2f));//sub(w.plr.v, scale(relV, 0.152f));
+
+						w.cam.v = add(w.cam.v, add(scale(randF2, 1.0f), scale(relV, -0.2f)));
+		
+						w.es[i].fireTimer += w.gun.fireWait;
+						w.bs[j].evil = true;
+					}
+				}
+				if(w.es[i].fireTimer <= 0.0){//the bullet limit has been reached
+					w.es[i].fireTimer = w.gun.fireWait;
+				}
 			}
-			break;
-			float foot_speed = 1.5f;
-			float drag_const = 1.0f;
+
+			if(w.es[i].fireTimer >= 0.0){
+				w.es[i].fireTimer -= dt;
+			}
+			else {
+				w.es[i].fireTimer = 0.0f;
+			}
+
+			float foot_speed = 0.5f;
+			float drag_const = 5.0f;
 
 			float2 v_feet = add(scale(inDir, -foot_speed), w.es[i].v);
 			float2 J_drag = scale(sub(v_feet, add(w.m.v, scale(perp(sub(w.m.r, w.es[i].r)), w.m.omega))), -drag_const*dt);
@@ -342,7 +370,7 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 			w.es[i].r = add(scale(w.es[i].dv, dt/2), add(w.es[i].r, scale(w.es[i].v, dt)));
 			w.es[i].v = add(w.es[i].v, w.es[i].dv);
 
-			w.es[i].dir = inDir;
+			w.es[i].dir = normalize(sub(w.plr.r, w.es[i].r));//inDir;
 			w.es[i].dv = float2(0.0, 0.0);
 			collideMap(w, w.es[i].m, w.es[i].r, w.es[i].v, 0.05f);
 			
@@ -351,7 +379,7 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 			}
 
 			for(int b = 0; b < sizeof(w.bs)/sizeof(w.bs[0]); b++){
-				if(w.bs[b].alive > 0.0f){
+				if(w.bs[b].alive > 0.0f && !w.bs[b].evil){
 					if(dotMe(sub(w.bs[b].r, w.es[i].r)) < sq(0.1)){
 						w.es[i].health -= 1;
 						w.bs[b].alive = 0.0;
@@ -377,11 +405,19 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 				w.bs[i].alive = 0.0f;
 			}
 
+			if(touchingBlock(w, w.bs[i].r, 0.05f, 1)){
+				w.bs[i].alive = 0.0f;
+			}
+
 			if(collideMap(w, 0.2, w.bs[i].r, w.bs[i].v, 0.05f)){
 				w.bs[i].dir = normalize(w.bs[i].v);
-				w.bs[i].alive = 0.25f;
+				w.bs[i].alive = 0.025f;
 			}
 			w.bs[i].alive -= dt;
+
+			if(w.bs[i].evil && dotMe(sub(w.bs[i].r, w.plr.r)) < sq(0.1f)){
+				w.plr.health -= 1;
+			}
 		}
 	}
 
@@ -398,11 +434,12 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 				w.bs[i].v = add(relV, w.plr.v);
 				w.bs[i].dir = w.plr.dir;
 
-				//w.plr.v = sub(w.plr.v, scale(w.plr.dir, 0.2f));//sub(w.plr.v, scale(relV, 0.152f));
+				w.plr.v = sub(w.plr.v, scale(w.plr.dir, 0.2f));//sub(w.plr.v, scale(relV, 0.152f));
 
 				w.cam.v = add(w.cam.v, add(scale(randF2, 1.0f), scale(relV, -0.2f)));
 		
 				w.gun.fireTimer += w.gun.fireWait;
+				w.bs[i].evil = false;
 			}
 		}
 		if(w.gun.fireTimer <= 0.0){//the bullet limit has been reached

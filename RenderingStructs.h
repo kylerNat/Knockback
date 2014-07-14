@@ -21,8 +21,11 @@ typedef enum{
 	modId_floor,
 	modId_wall,
 	modId_crosshair,
+	modId_corpse,
 	modId_player,
+	modId_pirate,
 	modId_bullet,
+	modId_evil_bullet,
 	modId_count,
 } modId;
 

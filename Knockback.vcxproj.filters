@@ -64,5 +64,11 @@
     <None Include="shaders\Vertex.vert">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="shaders\FragmentPost.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\VertexPost.vert">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,43 +1,19 @@
-﻿Build started 7/13/2014 2:04:15 PM.
+﻿Build started 7/13/2014 10:30:57 PM.
      1>Project "C:\Users\Kyler\Programing Stuffs\Knockback\Knockback\Knockback.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Knockback.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Users\Kyler\Programing Stuffs\Knockback\glext" /I"C:\Users\Kyler\Programing Stuffs\Knockback\glew-1.10.0\include" /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Game.cpp
-         Game.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Users\Kyler\Programing Stuffs\Knockback\glext" /I"C:\Users\Kyler\Programing Stuffs\Knockback\glew-1.10.0\include" /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Platform.cpp
+         Platform.cpp
      1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(12): warning C4305: 'initializing' : truncation from 'double' to 'const float'
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(126): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(126): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(126): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(126): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(130): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(133): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(211): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(211): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(211): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(211): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(212): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(212): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(220): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(221): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(222): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(228): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(229): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(230): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(208): warning C4101: 'v_b' : unreferenced local variable
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(262): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(262): warning C4244: '+=' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(264): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(265): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(266): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(271): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(271): warning C4244: '+=' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(273): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(274): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(275): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(349): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(355): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(380): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(48): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(49): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(50): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(51): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(53): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(54): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(55): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(56): warning C4305: 'argument' : truncation from 'double' to 'float'
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.exe" /NOLOGO /LIBPATH:"C:\Users\Kyler\Programing Stuffs\Knockback\glew-1.10.0\lib" opengl32.lib glu32.lib glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Knockback.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.lib" /MACHINE:X86 Debug\Files.obj
          Debug\Game.obj
@@ -56,4 +32,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.29
+Time Elapsed 00:00:01.83

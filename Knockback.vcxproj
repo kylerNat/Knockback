@@ -80,7 +80,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\Fragment.frag" />
+    <None Include="shaders\FragmentPost.frag" />
     <None Include="shaders\Vertex.vert" />
+    <None Include="shaders\VertexPost.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
