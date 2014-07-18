@@ -12,6 +12,7 @@ void main() {
 	gl_Position.xyz = p;
 	gl_Position.w = 1.0;
 	gl_Position = gl_Position*t;
+	gl_Position.xy *= 0.5;
 
 	pos = p;
 	if(abs(t[1][0]) < 2.0){

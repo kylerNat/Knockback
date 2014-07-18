@@ -1,8 +1,8 @@
 #include "Game.h"
 /*TODO:
+	water physics?(optional)
 	multiple weapons
-	levels
-	enemies
+	enemy ai
 */
 
 int map_s(int id, int x, int y){
@@ -61,6 +61,7 @@ void renderWorld(world &/*temp*/ w, vertexObject * vOs, GLuint trans){
 		for(int y = -(map_size_y-1)/2; y < map_size_y-(map_size_y-1)/2; y++){
 			renderObject(sub(add(w.m.r, complexx(float2(x*block_scale+block_margin, y*block_scale), float2(cos(w.m.theta), -sin(w.m.theta)))), w.cam.r), float2(sin(w.m.theta)*block_scale, cos(w.m.theta)*block_scale), (modId) (map_s(w.m.id, x, y)+modId_floor), renderArgs);		
 			renderObject(sub(add(w.m.r, complexx(float2(x*block_scale, y*block_scale+block_margin), float2(cos(w.m.theta), -sin(w.m.theta)))), w.cam.r), float2(sin(w.m.theta)*block_scale, cos(w.m.theta)*block_scale), (modId) (map_s(w.m.id, x, y)+modId_floor), renderArgs);
+			renderObject(sub(add(w.m.r, complexx(float2(x*block_scale+block_margin, y*block_scale+block_margin), float2(cos(w.m.theta), -sin(w.m.theta)))), w.cam.r), float2(sin(w.m.theta)*block_scale, cos(w.m.theta)*block_scale), (modId) (map_s(w.m.id, x, y)+modId_floor), renderArgs);		
 		}
 	}
 
@@ -91,7 +92,7 @@ world createWorld(){//make constuctor?
 	w.m.r = float2(-0.0, -0.0);
 	w.m.theta = 0.0;
 	w.m.omega = 0.0;
-	w.m.m = 50.0;
+	w.m.m = 10.0;
 	w.m.I = 25.0;
 
 	w.plr.health = 1;
@@ -281,6 +282,10 @@ bool intersectsLine(world & w, float2 r0, float2 r1) {
 
 //TODO: set accelerations first, then update velocities and positions, otherwise some objects are unsyncronized, which causes problems at low framerates or high speeds
 void worldLoop(world & w, float dt){//make member function for convinience?
+	if(input::pressed('R')){
+		w = createWorld();
+	}
+	
 	w.mousePos = float2(1.0f/(1.0f*500.0f)*input::mouse[0], -1.0f/(1.0f*500.0f)*input::mouse[1]);
 	//float2 plr_dv = float2(0.0, 0.0);
 
@@ -321,11 +326,12 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 
 	for(int i = 0; i < sizeof(w.es)/sizeof(w.es[0]); i++){
 		if(w.es[i].health > 0){
-			float2 inDir = normalize(w.es[i].v);//float2(random()-0.5f, random()-0.5f));// = normalize(sub(w.plr.r, w.es[i].r));
+			float2 inDir = scale(normalize(w.es[i].v), -1.0);//float2(random()-0.5f, random()-0.5f));// = normalize(sub(w.plr.r, w.es[i].r));
 
 			if(intersectsLine(w, w.es[i].r, w.plr.r) || dotMe(sub(w.es[i].r, w.plr.r)) > sq(2.0f)){
 				//inDir = normalize(float2(random()-0.5f, random()-0.5f));//scale(inDir, -1.0f);
 			}else{//TODO stop bullets from spawning in walls
+				inDir = normalize(w.es[i].v);
 				//w.plr.v = sub(w.plr.v, scale(w.plr.dir, 2.0f*dt));
 				for(int j = 0; j < sizeof(w.bs)/sizeof(w.bs[0]) && w.es[i].fireTimer <= 0.0; j++){
 					if(w.bs[j].alive <= 0.0f){
@@ -334,7 +340,7 @@ void worldLoop(world & w, float dt){//make member function for convinience?
 						float2 randF2 = normalize(float2(2.0f*(random()-0.5f), 2.0f*(random()-0.5f)));
 						float theta = atan2(w.es[i].dir[0], w.es[i].dir[1]);
 						theta += w.gun.spread*2.0f*(random()-0.5f);//TODO: make gaussian distrobution
-						float2 relV = scale(float2(sin(theta), cos(theta)), 0.25);
+						float2 relV = scale(float2(sin(theta), cos(theta)), 1.5);
 						w.bs[j].v = add(relV, w.es[i].v);
 						w.bs[j].dir = w.es[i].dir;
 

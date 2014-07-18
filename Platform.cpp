@@ -362,7 +362,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		//endfrom
 
-		wglSwapIntervalEXT(0);//TODO: temp
+		wglSwapIntervalEXT(1);//TODO: temp
 		
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
@@ -404,7 +404,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	glActiveTexture(GL_TEXTURE0);
 	glGenTextures(1, &tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, resolution[0], resolution[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, resolution[0]*2, resolution[1]*2, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -416,7 +416,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	GLuint depth_buffer;
 	glGenRenderbuffers(1, &depth_buffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, depth_buffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, resolution[0], resolution[1]);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, resolution[0]*2, resolution[1]*2);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	GLuint frameBuffer;
@@ -479,8 +479,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		oldTime = curTime;
 
 		{//render stuff
+			glViewport(0, 0, resolution[0]*2, resolution[0]*2);
 			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+			glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
 			glClearDepth(0.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -496,6 +497,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			//draw framebuffer
+			glViewport(0, 0, resolution[0], resolution[0]);
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClearDepth(0.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -506,6 +508,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			GLuint texture = glGetUniformLocation(post_program, "tex");
 			glUniform1i(texture, 0);
 			
+			GLuint tim = glGetUniformLocation(post_program, "time");
+			glUniform1f(tim, (float)(curTime.QuadPart)/(float)(frq.QuadPart));
+
+			GLuint center = glGetUniformLocation(post_program, "center");
+			glUniform2fv(center, 1, &w.cam.r[0]);
+
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_fbo_vertices);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 2, GL_FLOAT, 0, 0, 0);
