@@ -372,6 +372,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		glViewport(0, 0, resolution[0], resolution[1]);
 	}
 
+	world w = createWorld();
+
 	GLuint vbo_fbo_vertices;
 
 	GLfloat fbo_vertices[] = {
@@ -428,6 +430,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	//glDrawBuffer(0);
 
+	//water buffer
+	GLuint water_height;
+	glActiveTexture(GL_TEXTURE1);
+	glGenTextures(1, &water_height);
+	glBindTexture(GL_TEXTURE_2D, water_height);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 100, 100, 0, GL_RED, GL_FLOAT, &w.wh[w.awh][0][0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	GLenum error = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if(error != GL_FRAMEBUFFER_COMPLETE){
 		fprintf(stderr, "glCheckFramebufferStatus: error %p", error);
@@ -444,8 +458,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		QueryPerformanceCounter(&curTime);
 		oldTime = curTime;
 	}
-
-	world w = createWorld();
 
 	MSG msg;
 
@@ -474,7 +486,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		old_dt = dt;
 
 		for(; left_over_time >= 0.0; left_over_time -= frametime){
-			worldLoop(w, frametime);
+			worldLoop(&w, frametime);
 		}
 		oldTime = curTime;
 
@@ -492,7 +504,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			//renderObject(scale(w.cam.r, -1.0), float2(10000.0, 0.0), modId_wall, vOs, trans);
 			//<\temp>
 
-			renderWorld(w, vOs, trans);
+			renderWorld(&w, vOs, trans);
 			
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -504,16 +516,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 			glUseProgram(post_program);
 			
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, tex);
 			GLuint texture = glGetUniformLocation(post_program, "tex");
 			glUniform1i(texture, 0);
+
+			glActiveTexture(GL_TEXTURE1);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 100, 100, 0, GL_RED, GL_FLOAT, &w.wh[w.awh]);
+			glBindTexture(GL_TEXTURE_2D, water_height);
+			GLuint wh = glGetUniformLocation(post_program, "wh");
+			glUniform1i(wh, 1);
 			
 			GLuint tim = glGetUniformLocation(post_program, "time");
 			glUniform1f(tim, (float)(curTime.QuadPart)/(float)(frq.QuadPart));
 
 			GLuint center = glGetUniformLocation(post_program, "center");
 			glUniform2fv(center, 1, &w.cam.r[0]);
-
+			
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_fbo_vertices);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 2, GL_FLOAT, 0, 0, 0);

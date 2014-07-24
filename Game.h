@@ -145,6 +145,9 @@ struct map{
 };
 
 struct world{
+	bool awh;
+	float wv[2][100][100];
+	float wh[2][100][100];
 	float2 debug_marker;
 	float2 debug_ms[500];
 	float2 mousePos;
@@ -159,8 +162,8 @@ struct world{
 
 void renderObject(float2 pos, float2 dir, modId model, vertexObject * vOs, GLuint trans);
 
-void renderWorld(world &/*temp*/ w, vertexObject * vOs, GLuint trans);
+void renderWorld(world * w, vertexObject * vOs, GLuint trans);
 
 world createWorld();
 
-void worldLoop(world &, float);
+void worldLoop(world *, float);
