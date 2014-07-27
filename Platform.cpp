@@ -362,7 +362,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		//endfrom
 
-		wglSwapIntervalEXT(1);//TODO: temp
+		wglSwapIntervalEXT(0);//TODO: temp
 		
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
@@ -486,14 +486,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		old_dt = dt;
 
 		for(; left_over_time >= 0.0; left_over_time -= frametime){
-			worldLoop(&w, frametime);
+			worldLoop(&w, frametime, (float)(curTime.QuadPart)/(float)(frq.QuadPart));
 		}
 		oldTime = curTime;
 
 		{//render stuff
 			glViewport(0, 0, resolution[0]*2, resolution[0]*2);
 			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-			glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+			glClearColor(0.5f, 0.5f, 0.5f, 0.1f);
 			glClearDepth(0.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -532,7 +532,36 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 			GLuint center = glGetUniformLocation(post_program, "center");
 			glUniform2fv(center, 1, &w.cam.r[0]);
+
+			float4x4 transform = {
+				1.0, 0.0, 0.0, 0.0,
+				0.0, 1.0, 0.0, 0.0,
+				0.0, 0.0, 1.0, 0.0,
+				0.0, 0.0, 0.0, 1.0,
+			};
+
+			transform[0][3] = 0.5*sub(w.cam.r, w.m.r)[0];
+			transform[1][3] = 0.5*sub(w.cam.r, w.m.r)[1];
+				
+			float4x4 rotation = {
+				1.0, 0.0, 0.0, 0.0,
+				0.0, 1.0, 0.0, 0.0,
+				0.0, 0.0, 1.0, 0.0,
+				0.0, 0.0, 0.0, 1.0,
+			};
+
+			float2 dir = float2(-sin(w.m.theta), cos(w.m.theta));
 			
+			rotation[0][0] =  dir[1];
+			rotation[0][1] =  dir[0];
+			rotation[1][0] = -dir[0];
+			rotation[1][1] =  dir[1];
+
+			transform = multiply(transform, rotation);
+			
+			GLuint water_trans = glGetUniformLocation(post_program, "trans_w");
+			glUniformMatrix4fv(water_trans, 1, false, (float*)&transform[0][0]);
+
 			glBindBuffer(GL_ARRAY_BUFFER, vbo_fbo_vertices);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 2, GL_FLOAT, 0, 0, 0);

@@ -1,18 +1,27 @@
 #include "Game.h"
 /*TODO:
-	water physics?(optional)
+	levels
+	water physics(in progress)
+	make bullet mechanics more consistant (the direction the level moves in vs. the direction you shoot)
 	multiple weapons
 	enemy ai
+	corpses
+	bullet gaps in enemy bullets?
+	vsync related lag issue?
 */
+
+int map_raw_s(int id, int x, int y){
+	if(x < 0 || y < 0 || x >= map_size_x || y >= map_size_y){
+		return 0;
+	}
+	return levels[id].walls[y][x];
+}
 
 int map_s(int id, int x, int y){
 	x += (map_size_x-1)/2;
 	y = -y;
 	y += (map_size_y-1)/2;
-	if(x < 0 || y < 0 || x >= map_size_x|| y >= map_size_y){
-		return 0;
-	}
-	return levels[id].walls[y][x];
+	return map_raw_s(id, x, y);
 }
 
 void loadLevel(world & w, int id){
@@ -29,14 +38,13 @@ void renderObject(float2 pos, float2 dir, modId model, vertexObject * vOs, GLuin
 		0.0, 0.0, 0.0, 1.0,
 	};
 
-	transform[0][3] = round(pos[0]*500.0f)/500.0f;
-	transform[1][3] = round(pos[1]*500.0f)/500.0f;
-				
+	transform[0][3] = pos[0];//round(pos[0]*500.0f)/500.0f;
+	transform[1][3] = pos[1];//round(pos[1]*500.0f)/500.0f;
+	
 	transform[0][0] = dir[1];
 	transform[0][1] = dir[0];
 	transform[1][0] = -dir[0];
 	transform[1][1] = dir[1];
-
 
 	bindVO(vOs[model]);
 	glUniformMatrix4fv(trans, 1, false, (float*)&transform[0][0]);
@@ -57,17 +65,18 @@ void renderWorld(world * w, vertexObject * vOs, GLuint trans){
 		renderObject(sub(w->es[i].r, w->cam.r), w->es[i].dir, (w->es[i].health > 0.0 ? modId_pirate : modId_corpse), renderArgs);
 	}
 
-	for(int x = -(map_size_x-1)/2; x < map_size_x-(map_size_x-1)/2; x++){
+	//TODO: temp
+	/*for(int x = -(map_size_x-1)/2; x < map_size_x-(map_size_x-1)/2; x++){
 		for(int y = -(map_size_y-1)/2; y < map_size_y-(map_size_y-1)/2; y++){
 			renderObject(sub(add(w->m.r, complexx(float2(x*block_scale+block_margin, y*block_scale), float2(cos(w->m.theta), -sin(w->m.theta)))), w->cam.r), float2(sin(w->m.theta)*block_scale, cos(w->m.theta)*block_scale), (modId) (map_s(w->m.id, x, y)+modId_floor), renderArgs);		
 			renderObject(sub(add(w->m.r, complexx(float2(x*block_scale, y*block_scale+block_margin), float2(cos(w->m.theta), -sin(w->m.theta)))), w->cam.r), float2(sin(w->m.theta)*block_scale, cos(w->m.theta)*block_scale), (modId) (map_s(w->m.id, x, y)+modId_floor), renderArgs);
 			renderObject(sub(add(w->m.r, complexx(float2(x*block_scale+block_margin, y*block_scale+block_margin), float2(cos(w->m.theta), -sin(w->m.theta)))), w->cam.r), float2(sin(w->m.theta)*block_scale, cos(w->m.theta)*block_scale), (modId) (map_s(w->m.id, x, y)+modId_floor), renderArgs);		
 		}
-	}
+	}*/
 
 	for(int x = -(map_size_x-1)/2; x < map_size_x-(map_size_x-1)/2; x++){
 		for(int y = -(map_size_y-1)/2; y < map_size_y-(map_size_y-1)/2; y++){
-			renderObject(sub(add(w->m.r, complexx(float2(x*block_scale, y*block_scale), float2(cos(w->m.theta), -sin(w->m.theta)))), w->cam.r), float2(sin(w->m.theta)*block_scale, cos(w->m.theta)*block_scale), (modId) (map_s(w->m.id, x, y)+modId_floor), renderArgs);
+			renderObject(sub(add(w->m.r, complexx(float2(x*block_scale, y*block_scale), float2(cos(w->m.theta), -sin(w->m.theta)))), w->cam.r), float2(sin(w->m.theta)*block_scale*1.1, cos(w->m.theta)*block_scale*1.1), (modId) (map_s(w->m.id, x, y)+modId_floor), renderArgs);
 		}
 	}
 
@@ -89,20 +98,20 @@ world createWorld(){//make constuctor?
 
 	w.wh[0][10][10] = 100.0f;
 
-	w.wh[0][10][11] = 1.0f;
-	w.wh[0][11][10] = 1.0f;
-	w.wh[0][9][10] = 1.0f;
-	w.wh[0][10][9] = 1.0f;
+	w.wh[0][10][11] = 100.0f;
+	w.wh[0][11][10] = 100.0f;
+	w.wh[0][9][10] = 100.0f;
+	w.wh[0][10][9] = 100.0f;
 
-	w.wh[0][11][11] = 1.0f;
-	w.wh[0][11][9] = 1.0f;
-	w.wh[0][9][11] = 1.0f;
-	w.wh[0][9][9] = 1.0f;
+	w.wh[0][11][11] = 100.0f;
+	w.wh[0][11][9] = 100.0f;
+	w.wh[0][9][11] = 100.0f;
+	w.wh[0][9][9] = 100.0f;
 
-	w.wh[0][10][12] = 1.0f;
-	w.wh[0][12][10] = 1.0f;
-	w.wh[0][8][10] = 1.0f;
-	w.wh[0][10][8] = 1.0f;
+	w.wh[0][10][12] = 100.0f;
+	w.wh[0][12][10] = 100.0f;
+	w.wh[0][8][10] = 100.0f;
+	w.wh[0][10][8] = 100.0f;
 	
 
 
@@ -330,9 +339,18 @@ float wh(world * w, bool current, int x, int y){
 	return w->wh[w->awh==current][x][y];
 }
 
+void ripple(world * w, float2 r){
+	float2 r_t = complexx(scale(sub(r, w->m.r), 4.0/block_scale), float2(cos(w->m.theta), sin(w->m.theta)));//transform the particle from the world space to map space
+	int x = (int)round(r_t[0])+50;
+	int y = (int)round(r_t[1])+50;
+	if(!(x < 0 || y < 0 || x >= 100 || y >= 100)){
+		w->wh[w->awh][y][x] = -5.0;
+	}
+}
+
 //TODO: set accelerations first, then update velocities and positions, otherwise some objects are unsyncronized, which causes problems at low framerates or high speeds
-void worldLoop(world * w, float dt){//make member function for convinience?
-	if(input::pressed('G')){//water physics
+void worldLoop(world * w, float dt, float time){//make member function for convinience?
+	{//if(input::pressed('G')){//water physics
 		w->awh = !w->awh;
 		for(int x = 0; x < sizeof(w->wh[0][0])/sizeof(w->wh[0][0][0]); x++){
 			for(int y = 0; y < sizeof(w->wh[0])/sizeof(w->wh[0][0]); y++){
@@ -342,7 +360,20 @@ void worldLoop(world * w, float dt){//make member function for convinience?
 				//w->wh[w->awh][x][y+1] -= 0.25*dh;
 				//w->wh[w->awh][x][y-1] -= 0.25*dh;
 				
-				float dv = - 1.0*dt*w->wh[!w->awh][x][y] - 2.5*dt*w->wv[!w->awh][x][y]
+				if(map_raw_s(w->m.id, (int)floor(y*(1.0*map_size_x/100.0)), floor((99-x)*(1.0*map_size_y/100.0))) == 1){
+					w->wh[w->awh][x][y] = 0.0;//10.0*abs(w->m.v);
+					continue;
+				}
+				/*
+				if(map_raw_s(w->m.id, (int)floor(y*(1.0*map_size_x/100.0)), floor((99-x-normalize(w->m.v[1]))*(1.0*map_size_y/100.0))) == 1){
+					w->wh[!w->awh][x][y] = 5.0*w->m.v[1];
+				}
+
+				if(map_raw_s(w->m.id, (int)floor((y-normalize(w->m.v[0]))*(1.0*map_size_x/100.0)), floor((99-x)*(1.0*map_size_y/100.0))) == 1){
+					w->wh[!w->awh][x][y] = 5.0*w->m.v[0];
+				}
+				*/
+				float dv = (random()-0.5)*50.0*dt - 1.0*dt*w->wh[!w->awh][x][y] - 2.5*dt*w->wv[!w->awh][x][y]
 					-50.0*dt*(
 						+(w->wh[!w->awh][x][y] - wh(w, 0, x+1, y))
 						+(w->wh[!w->awh][x][y] - wh(w, 0, x-1, y))
@@ -364,7 +395,12 @@ void worldLoop(world * w, float dt){//make member function for convinience?
 		}*/
 	}
 	
+	/*
+	input::mouse[0] = clamp(input::mouse[0], -500.0, 500.0);
+	input::mouse[1] = clamp(input::mouse[1], -500.0, 500.0);
+	*/
 	w->mousePos = float2(1.0f/(1.0f*500.0f)*input::mouse[0], -1.0f/(1.0f*500.0f)*input::mouse[1]);
+
 	//float2 plr_dv = float2(0.0, 0.0);
 
 	if(w->plr.health > 0){
@@ -393,6 +429,12 @@ void worldLoop(world * w, float dt){//make member function for convinience?
 		if(touchingBlock(w, w->plr.r, 0.05f, 2)){
 			w->plr.health = 0;
 		}
+		
+		w->plr.foot_timer += 10.0*dt*abs(w->plr.v);
+
+		for(; w->plr.foot_timer > 0.0; w->plr.foot_timer -= 1.0){
+			ripple(w, add(w->plr.r, scale(w->plr.v, 0.025)));
+		}
 	}
 
 	for(int i = 0; i < sizeof(w->debug_ms)/sizeof(w->debug_ms[0]); i++){
@@ -407,27 +449,30 @@ void worldLoop(world * w, float dt){//make member function for convinience?
 			float2 inDir = scale(normalize(w->es[i].v), -1.0);//float2(random()-0.5f, random()-0.5f));// = normalize(sub(w->plr.r, w->es[i].r));
 
 			if(intersectsLine(w, w->es[i].r, w->plr.r) || dotMe(sub(w->es[i].r, w->plr.r)) > sq(2.0f)){
+				//inDir = normalize(add(sub(w->plr.r, w->es[i].r), float2(10.0*(random()-0.5), 10.0*(random()-0.5))));//normalize(w->es[i].v);
 				//inDir = normalize(float2(random()-0.5f, random()-0.5f));//scale(inDir, -1.0f);
 			}else{//TODO stop bullets from spawning in walls
 				inDir = normalize(w->es[i].v);
 				//w->plr.v = sub(w->plr.v, scale(w->plr.dir, 2.0f*dt));
-				for(int j = 0; j < sizeof(w->bs)/sizeof(w->bs[0]) && w->es[i].fireTimer <= 0.0; j++){
-					if(w->bs[j].alive <= 0.0f){
-						w->bs[j].alive = 3.0f;
-						w->bs[j].r = add(add(w->es[i].r, scale(perp(w->plr.dir), -w->gun.offset[1])), scale(w->es[i].dir, w->gun.offset[0]));
-						float2 randF2 = normalize(float2(2.0f*(random()-0.5f), 2.0f*(random()-0.5f)));
-						float theta = atan2(w->es[i].dir[0], w->es[i].dir[1]);
-						theta += w->gun.spread*2.0f*(random()-0.5f);//TODO: make gaussian distrobution
-						float2 relV = scale(float2(sin(theta), cos(theta)), 1.5);
-						w->bs[j].v = add(relV, w->es[i].v);
-						w->bs[j].dir = w->es[i].dir;
+				if(int(time) % 3 < 2){
+					for(int j = 0; j < sizeof(w->bs)/sizeof(w->bs[0]) && w->es[i].fireTimer <= 0.0; j++){
+						if(w->bs[j].alive <= 0.0f){
+							w->bs[j].alive = 3.0f;
+							w->bs[j].r = add(add(w->es[i].r, scale(perp(w->plr.dir), -w->gun.offset[1])), scale(w->es[i].dir, w->gun.offset[0]));
+							float2 randF2 = normalize(float2(2.0f*(random()-0.5f), 2.0f*(random()-0.5f)));
+							float theta = atan2(w->es[i].dir[0], w->es[i].dir[1]);
+							theta += w->gun.spread*2.0f*(random()-0.5f);//TODO: make gaussian distrobution
+							float2 relV = scale(float2(sin(theta), cos(theta)), 1.5);
+							w->bs[j].v = add(relV, w->es[i].v);
+							w->bs[j].dir = w->es[i].dir;
 
-						w->es[i].v = sub(w->es[i].v, scale(w->es[i].dir, 0.2f));//sub(w->plr.v, scale(relV, 0.152f));
+							w->es[i].v = sub(w->es[i].v, scale(w->es[i].dir, 0.2f));//sub(w->plr.v, scale(relV, 0.152f));
 
-						w->cam.v = add(w->cam.v, add(scale(randF2, 1.0f), scale(relV, -0.2f)));
+							w->cam.v = add(w->cam.v, add(scale(randF2, 1.0f), scale(relV, -0.2f)));
 		
-						w->es[i].fireTimer += w->gun.fireWait;
-						w->bs[j].evil = true;
+							w->es[i].fireTimer += w->gun.fireWait;
+							w->bs[j].evil = true;
+						}
 					}
 				}
 				if(w->es[i].fireTimer <= 0.0){//the bullet limit has been reached
@@ -443,7 +488,7 @@ void worldLoop(world * w, float dt){//make member function for convinience?
 			}
 
 			float foot_speed = 0.5f;
-			float drag_const = 5.0f;
+			float drag_const = 1.0f;
 
 			float2 v_feet = add(scale(inDir, -foot_speed), w->es[i].v);
 			float2 J_drag = scale(sub(v_feet, add(w->m.v, scale(perp(sub(w->m.r, w->es[i].r)), w->m.omega))), -drag_const*dt);
@@ -458,6 +503,8 @@ void worldLoop(world * w, float dt){//make member function for convinience?
 			w->es[i].dv = float2(0.0, 0.0);
 			collideMap(w, w->es[i].m, w->es[i].r, w->es[i].v, 0.05f);
 			
+			ripple(w, w->es[i].r);
+
 			if(dotMe(sub(w->plr.r, w->es[i].r)) < sq(0.1)){
 				w->plr.health -= 1;
 			}
@@ -505,7 +552,7 @@ void worldLoop(world * w, float dt){//make member function for convinience?
 		}
 	}
 
-	if(input::pressed(VK_LBUTTON)){//TODO stop bullets from spawning in walls
+	if(input::pressed(VK_LBUTTON) && w->plr.health > 0.0){//TODO stop bullets from spawning in walls
 		//w->plr.v = sub(w->plr.v, scale(w->plr.dir, 2.0f*dt));
 		for(int i = 0; i < sizeof(w->bs)/sizeof(w->bs[0]) && w->gun.fireTimer <= 0.0; i++){
 			if(w->bs[i].alive <= 0.0f){
@@ -519,6 +566,8 @@ void worldLoop(world * w, float dt){//make member function for convinience?
 				w->bs[i].dir = w->plr.dir;
 
 				w->plr.v = sub(w->plr.v, scale(w->plr.dir, 0.2f));//sub(w->plr.v, scale(relV, 0.152f));
+
+				w->m.v = add(w->m.v, scale(w->plr.dir, w->plr.m*0.2f/w->m.m));//TODO: apply a torque aswell
 
 				w->cam.v = add(w->cam.v, add(scale(randF2, 1.0f), scale(relV, -0.2f)));
 		
