@@ -124,30 +124,9 @@ void main(void) {
 			
 			//gl_FragColor.xyz *= 0.75f;
 			//gl_FragColor.xyz += 0.5*vec3(0.11, 0.42, 0.63);
-			
-
-			
-			/*
-			for(int i = -5; i < 5; i++){
-				for(int j = -5; j < 5; j++){
-					gl_FragColor.xyz +=
-						0.01*beckmann(
-							view,
-							norm3,
-							vec3(-1.0*(gl_FragCoord.xy/res - vec2(0.5, 0.5) + 0.1*vec2(i, j)), -0.5f),
-							0.02125f
-						);
-				}
-			}
-			*/
 		}
 		gl_FragColor.xyz +=
-			/*reflectance(
-				view,
-				norm3,
-				vec3(1.0*(gl_FragCoord.xy/res - vec2(0.5, 0.5)), -0.5f)
-			)*/
-			1.0*beckmann(
+			0.01*beckmann(
 				view,
 				norm3,
 				vec3(1.0*(gl_FragCoord.xy/res - vec2(0.5, 0.5)), -0.5f),

@@ -26,6 +26,24 @@ namespace files{
 		return out;
 	}
 
+	off_t read(const char * filename, void * out){
+		FILE * file;
+		fopen_s(&file, filename, "rb");
+
+		//get length
+		struct stat file_stats;
+		stat(filename, &file_stats);
+		off_t length = file_stats.st_size;
+
+		//read the file
+		out = new char[length];
+		char * o = (char*) out;
+		fread(o, sizeof(o[0]), length, file);
+
+		fclose(file);
+		return length;
+	}
+
 	modelData getVertexData(const char * filename){
 		size_t nVerts = 0;
 		size_t nFaces = 0;

@@ -324,6 +324,65 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 
+	LPDIRECTSOUND8 ds_face;
+	LPDIRECTSOUNDBUFFER dsb;
+	LPDIRECTSOUNDBUFFER8 dsb8;
+
+	{//create sound device
+		auto err = DirectSoundCreate8(0, &ds_face, 0);
+		if(err != DS_OK){
+			return err;
+		}
+
+		err = ds_face->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
+		if(err != DS_OK){
+			return err;
+		}
+
+		WAVEFORMATEX wft = {
+			WAVE_FORMAT_PCM, //wFormatTag
+			1, //nChannels
+			44100, //nSamplesPerSec
+			88200, //nAvgBytesPerSex = nSamplesPerSec*nBlockAlign = nSamplesPerSec*nChannels*wBitsPerSample/8
+			2, //nBlockAlign = nChannels*wBitsPerSample/8
+			16, //wBitsPerSample
+			0, //cbSize
+		};
+
+		DSBUFFERDESC dsb_desc = {
+			sizeof(DSBUFFERDESC),
+			DSBCAPS_CTRLVOLUME|DSBCAPS_CTRLPOSITIONNOTIFY|DSBCAPS_GETCURRENTPOSITION2|DSBCAPS_GLOBALFOCUS,
+			DSBSIZE_MAX,
+			0,//reserved
+			&wft,
+			GUID_NULL,
+		};
+		
+		HRESULT buff_err = ds_face->CreateSoundBuffer(&dsb_desc, &dsb, 0);
+		if(buff_err != DS_OK && buff_err != DS_NO_VIRTUALIZATION){
+			return buff_err;
+		}
+
+		dsb->QueryInterface(IID_IDirectSoundBuffer8, (LPVOID*) &dsb8);
+		
+		LPDWORD size0 = (LPDWORD)53036;
+		char * snd0 = new char[53036];
+		
+		LPDWORD size1 = (LPDWORD)0;
+		char * snd1 = new char[53036];
+
+		err = dsb8->Lock(0, 53036, (LPVOID *) snd0, size0, (LPVOID *) snd1, size1, 0);
+		if(err != DS_OK){
+			return err;
+		}
+		files::read("sounds/Meaty_Deaths_2.wav", snd0);
+		dsb8->Unlock((LPVOID *) snd0, *size0, (LPVOID *) snd1, *size1);
+
+		dsb8->SetCurrentPosition(0);
+		dsb8->SetVolume(10000);
+		dsb8->Play(0, 0, DSBPLAY_LOOPING);
+	}
+
 	SetCursor(0);//disable cursor
 	RECT r;
 	GetWindowRect( hwnd, &r);
@@ -465,6 +524,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	float old_dt = 0.0;
 
 	do {
+		if(input::pressed('Q')){
+			dsb8->Play(0, 0, DSBPLAY_LOOPING);
+		}
+
 		if(input::pressed('O')){
 			wglSwapIntervalEXT(1);
 		}

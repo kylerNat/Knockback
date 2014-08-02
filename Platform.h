@@ -9,6 +9,7 @@
 #include "Game.h"
 
 #include <windows.h>
+#include <dsound.h>
 #include <GL/glew.h>
 #include <GL/wglew.h>
 #include <time.h>
