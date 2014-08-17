@@ -1,16 +1,20 @@
 #include "Game.h"
 /*TODO:
-	sounds!
 	goal
 	levels
 		other block types
-	make bullet mechanics more consistant (the direction the level moves in vs. the direction you shoot)(done)
-	multiple weapons
-	enemy ai
-	corpses, react to bullets
-	bullet gaps in enemy bullets?
+	multiple weapons//mabye
+	enemy ai//done?
+	//bullet gaps in enemy bullets?
 	lag issue when game is started with vsync on?
 	screen shake for everything
+	menu
+	music
+
+DONE:
+	gibs, blood//corpses, react to bullets
+	sounds!	
+	make bullet mechanics more consistant (the direction the level moves in vs. the direction you shoot)
 */
 
 int map_raw_s(int id, int x, int y){
@@ -28,8 +32,34 @@ int map_s(int id, int x, int y){
 }
 
 void loadLevel(world & w, int id){
+	w.m.id = id;
+	w.m.r = float2(-0.0, -0.0);
+	w.m.v = float2(-0.0, -0.0);
+	w.m.theta = 0.0;
+	w.m.omega = 0.0;
+
+	w.unpaused = false;
+
+	for(int i = 0; i < sizeof(w.bs)/sizeof(w.bs[0]); i++){
+		w.bs[i].alive = 0.0;
+	}
+
+	w.plr.health = 1;
+	w.plr.dv = float2(0.0, 0.0);
+	w.plr.v = float2(0.0, 0.0);
 	w.plr.r = levels[id].pr;
+		
+	w.gun.fireTimer = 0.0;
+
+	for(int i = 0; i < sizeof(w.gibs)/sizeof(w.gibs[0]); i++){
+		w.gibs[i].alive = false;
+	}
+
 	for(int i = 0; i < sizeof(levels[id].ers)/sizeof(levels[id].ers[0]); i++){
+		w.es[i].health = 1;
+		w.es[i].fireTimer = 0.1*(i+1);
+		w.es[i].dv = float2(0.0, 0.0);
+		w.es[i].v = float2(0.0, 0.0);
 		w.es[i].r = levels[id].ers[i];
 	}
 }
@@ -42,8 +72,8 @@ void renderObject(float2 pos, float2 dir, modId model, vertexObject * vOs, GLuin
 		0.0, 0.0, 0.0, 1.0,
 	};
 
-	transform[0][3] = pos[0];//round(pos[0]*500.0f)/500.0f;
-	transform[1][3] = pos[1];//round(pos[1]*500.0f)/500.0f;
+	transform[0][3] = pos[0];//(round(pos[0]*250.0f)+0.25)/250.0f;
+	transform[1][3] = pos[1];//(round(pos[1]*250.0f)+0.25)/250.0f;
 	
 	transform[0][0] = dir[1];
 	transform[0][1] = dir[0];
@@ -65,8 +95,14 @@ void renderWorld(world * w, vertexObject * vOs, GLuint trans){
 		}
 	}
 
+	for(int i = 0; i < sizeof(w->gibs)/sizeof(w->gibs[0]); i++){
+		if(w->gibs[i].alive > 0.0f){
+			renderObject(sub(w->gibs[i].r, w->cam.r), scale(w->gibs[i].dir, (i%10+8)*0.1), modId_corpse, renderArgs);
+		}
+	}
+	
 	for(int i = 0; i < sizeof(w->es)/sizeof(w->es[0]); i++){
-		renderObject(sub(w->es[i].r, w->cam.r), w->es[i].dir, (w->es[i].health > 0.0 ? modId_pirate : modId_corpse), renderArgs);
+		renderObject(sub(w->es[i].r, w->cam.r), w->es[i].dir, (w->es[i].health > 0.0 ? modId_pirate : modId_none), renderArgs);
 	}
 
 	//TODO: temp
@@ -80,10 +116,10 @@ void renderWorld(world * w, vertexObject * vOs, GLuint trans){
 
 	for(int x = -(map_size_x-1)/2; x < map_size_x-(map_size_x-1)/2; x++){
 		for(int y = -(map_size_y-1)/2; y < map_size_y-(map_size_y-1)/2; y++){
-			renderObject(sub(add(w->m.r, complexx(float2(x*block_scale, y*block_scale), float2(cos(w->m.theta), -sin(w->m.theta)))), w->cam.r), float2(sin(w->m.theta)*block_scale*1.1, cos(w->m.theta)*block_scale*1.1), (modId) (map_s(w->m.id, x, y)+modId_floor), renderArgs);
+			renderObject(sub(add(w->m.r, complexx(float2(x*block_scale, y*block_scale), float2(cos(w->m.theta), -sin(w->m.theta)))), w->cam.r), scale(float2(sin(w->m.theta), cos(w->m.theta)), block_scale*1.001), (modId) (map_s(w->m.id, x, y)+modId_floor), renderArgs);
 		}
 	}
-
+	/*
 	for(int i = 0; i < sizeof(w->debug_ms)/sizeof(w->debug_ms[0]); i++){
 		if(w->debug_ms[i][1] > 1000000.0f){
 			continue;
@@ -91,7 +127,7 @@ void renderWorld(world * w, vertexObject * vOs, GLuint trans){
 		renderObject(sub(w->debug_ms[i], w->cam.r), float2(0.0f, 1.0f), modId_crosshair, renderArgs);
 	}
 	renderObject(sub(w->debug_marker, w->cam.r), float2(0.0f, 1.0f), modId_bullet, renderArgs);
-	
+	*/
 	renderObject(w->mousePos, float2(0.0f, 1.0f), modId_crosshair, renderArgs);
 }
 
@@ -100,58 +136,17 @@ world createWorld(){//make constuctor?
 	
 	world w = {0};
 
-	w.wh[0][10][10] = 100.0f;
-
-	w.wh[0][10][11] = 100.0f;
-	w.wh[0][11][10] = 100.0f;
-	w.wh[0][9][10] = 100.0f;
-	w.wh[0][10][9] = 100.0f;
-
-	w.wh[0][11][11] = 100.0f;
-	w.wh[0][11][9] = 100.0f;
-	w.wh[0][9][11] = 100.0f;
-	w.wh[0][9][9] = 100.0f;
-
-	w.wh[0][10][12] = 100.0f;
-	w.wh[0][12][10] = 100.0f;
-	w.wh[0][8][10] = 100.0f;
-	w.wh[0][10][8] = 100.0f;
-	
-
-
-	w.wh[0][90][10] = 10.0f;
-
-	w.wh[0][90][11] = 1.0f;
-	w.wh[0][91][10] = 1.0f;
-	w.wh[0][89][10] = 1.0f;
-	w.wh[0][90][9] = 1.0f;
-
-	w.wh[0][91][11] = 1.0f;
-	w.wh[0][91][9] = 1.0f;
-	w.wh[0][89][11] = 1.0f;
-	w.wh[0][89][9] = 1.0f;
-
-	w.wh[0][90][12] = 1.0f;
-	w.wh[0][92][10] = 1.0f;
-	w.wh[0][88][10] = 1.0f;
-	w.wh[0][90][8] = 1.0f;
-
-	
-	//w.wh[0][45][90] = 10000.0f;
-	
-	//w.wh[0][55][90] = 10000.0f;
-
-	//w.wh[0][20][20] = 10.0f;
-
-	loadLevel(w, 0);
+	loadLevel(w, 3);
 
 	w.m.r = float2(-0.0, -0.0);
 	w.m.theta = 0.0;
 	w.m.omega = 0.0;
-	w.m.m = 10.0;
+	w.m.m = 20.0;
 	w.m.I = 25.0;
-
+	/*
 	w.plr.health = 1;
+	*/
+	w.nl_timer = 1.0;
 
 	/*
 	w.gun.fireWait = 0.0015f;
@@ -159,8 +154,8 @@ world createWorld(){//make constuctor?
 	w.gun.offset = float2(0.1f, 0.0f);
 	*/
 
-	w.gun.fireWait = 0.05f;
-	w.gun.spread = 0.105f;
+	w.gun.fireWait = 0.25f;
+	w.gun.spread = 0*0.105f;
 	w.gun.offset = float2(0.05f, 0.0f);
 
 	w.plr.m = 1.0;
@@ -352,8 +347,41 @@ void ripple(world * w, float2 r){
 	}
 }
 
+void gib(world * w, float2 r, float2 v, int n){
+	float2 p = scale(v, -1.0);
+	for(long2 i = long2(1, 0); i[0] <= n && i[1] < sizeof(w->gibs)/sizeof(w->gibs[0]); i[1]++){
+		if(w->gibs[i[1]].alive <= 0.0){
+			float2 gv;
+			if(i[0] == n){
+				gv = p;
+			}
+			else{
+				gv = add(v, float2(random()-0.5, random()-0.5));
+				p = add(p, scale(gv, -1.0/n));
+			}
+			i[0]++;
+			w->gibs[i[1]].alive = true;
+			w->gibs[i[1]].r = r;
+			w->gibs[i[1]].v = gv;
+		}
+	}
+}
+
 //TODO: set accelerations first, then update velocities and positions, otherwise some objects are unsyncronized, which causes problems at low framerates or high speeds
 void worldLoop(world * w, float dt, float time){//make member function for convinience?
+	const float bm = 1.0;
+	if(input::pressed('R')){
+		loadLevel(*w, w->m.id);
+	}
+	
+	if(input::pressed('Q') && w->gibs[0].alive <= 0.0){
+		gib(w, w->plr.r, w->plr.v, 100);
+	}
+
+	if(!w->unpaused){
+		dt = 0.0;
+	}
+
 	{//if(input::pressed('G')){//water physics
 		w->awh = !w->awh;
 		for(int x = 0; x < sizeof(w->wh[0][0])/sizeof(w->wh[0][0][0]); x++){
@@ -399,10 +427,10 @@ void worldLoop(world * w, float dt, float time){//make member function for convi
 		}*/
 	}
 	
-	/*
-	input::mouse[0] = clamp(input::mouse[0], -500.0, 500.0);
-	input::mouse[1] = clamp(input::mouse[1], -500.0, 500.0);
-	*/
+	
+	input::mouse[0] = clamp(input::mouse[0], -1000.0, 1000.0);
+	input::mouse[1] = clamp(input::mouse[1], -1000.0, 1000.0);
+	
 	w->mousePos = float2(1.0f/(1.0f*500.0f)*input::mouse[0], -1.0f/(1.0f*500.0f)*input::mouse[1]);
 
 	//float2 plr_dv = float2(0.0, 0.0);
@@ -436,36 +464,53 @@ void worldLoop(world * w, float dt, float time){//make member function for convi
 		}
 		w->plr.dv = float2(0.0, 0.0);
 		collideMap(w, w->plr.m, w->plr.r, w->plr.v, 0.05f);
-		if(touchingBlock(w, w->plr.r, 0.05f, 2)){
+		if(touchingBlock(w, w->plr.r, 0.05f, 2) && w->plr.health > 0){
+			LPDIRECTSOUNDBUFFER dsb1;
+			sound::ds_face->DuplicateSoundBuffer(sound::snds[1], &dsb1);
+			dsb1->Play(clamp((int) w->gun.fireTimer*1000, 0, 10000), 0, 0);
 			w->plr.health = 0;
+			gib(w, w->plr.r, w->plr.v, 100);
 		}
 		
 		w->plr.foot_timer += 10.0*dt*abs(w->plr.v);
 
 		for(; w->plr.foot_timer > 0.0; w->plr.foot_timer -= 1.0){
+			LPDIRECTSOUNDBUFFER dsb1;
+			sound::ds_face->DuplicateSoundBuffer(sound::snds[sndId_step], &dsb1);
+			dsb1->Play(clamp((int) w->gun.fireTimer*1000, 0, 10000), 0, 0);
 			ripple(w, add(w->plr.r, scale(w->plr.v, 0.025)));
 		}
 	}
-
+/*
 	for(int i = 0; i < sizeof(w->debug_ms)/sizeof(w->debug_ms[0]); i++){
 		if(w->debug_ms[i][1] > 1000000.0f){
 			continue;
 		}
 		w->debug_ms[i] = float2(0.0, 100000000.0f);
 	}
+	*/
+	bool done = true;
 
 	for(int i = 0; i < sizeof(w->es)/sizeof(w->es[0]); i++){
 		{
 			float2 inDir = scale(normalize(w->es[i].v), -1.0);//float2(random()-0.5f, random()-0.5f));// = normalize(sub(w->plr.r, w->es[i].r));
 
 			if(w->es[i].health > 0){
-				if(intersectsLine(w, w->es[i].r, w->plr.r) || dotMe(sub(w->es[i].r, w->plr.r)) > sq(2.0f)){
+				done = false;
+
+				if(intersectsLine(w, w->es[i].r, w->plr.r)){// || dotMe(sub(w->es[i].r, w->plr.r)) > sq(2.0f)){
 					//inDir = normalize(add(sub(w->plr.r, w->es[i].r), float2(10.0*(random()-0.5), 10.0*(random()-0.5))));//normalize(w->es[i].v);
-					inDir = normalize(float2(random()-0.5f, random()-0.5f));//scale(inDir, -1.0f);
+					//inDir = normalize(float2(random()-0.5f, random()-0.5f));//scale(inDir, -1.0f);
 				}else{//TODO stop bullets from spawning in walls
-					inDir = normalize(w->es[i].v);
+					//inDir = normalize(w->es[i].v);
+
 					//w->plr.v = sub(w->plr.v, scale(w->plr.dir, 2.0f*dt));
-					if(int(time) % 3 < 2){
+					if(true){//int(time) % 3 < 2){
+						if(w->es[i].fireTimer <= 0.0){
+							LPDIRECTSOUNDBUFFER dsb1;
+							sound::ds_face->DuplicateSoundBuffer(sound::snds[0], &dsb1);
+							dsb1->Play(clamp((int) w->es[i].fireTimer*1000, 0, 10000), 0, 0);
+						}
 						for(int j = 0; j < sizeof(w->bs)/sizeof(w->bs[0]) && w->es[i].fireTimer <= 0.0; j++){
 							if(w->bs[j].alive <= 0.0f){
 								w->bs[j].alive = 3.0f;
@@ -473,14 +518,14 @@ void worldLoop(world * w, float dt, float time){//make member function for convi
 								float2 randF2 = normalize(float2(2.0f*(random()-0.5f), 2.0f*(random()-0.5f)));
 								float theta = atan2(w->es[i].dir[0], w->es[i].dir[1]);
 								theta += w->gun.spread*2.0f*(random()-0.5f);//TODO: make gaussian distrobution
-								float2 relV = scale(float2(sin(theta), cos(theta)), 1.5);
+								float2 relV = scale(float2(sin(theta), cos(theta)), 0.75*1.5);
 								w->bs[j].v = add(relV, w->es[i].v);
 								w->bs[j].dir = w->es[i].dir;
 
-								w->es[i].v = sub(w->es[i].v, scale(w->es[i].dir, 0.2f));//sub(w->plr.v, scale(relV, 0.152f));
+								w->es[i].v = sub(w->es[i].v, scale(w->es[i].dir, bm));//sub(w->plr.v, scale(relV, 0.152f));
 
 								w->cam.v = add(w->cam.v, add(scale(randF2, 1.0f), scale(relV, -0.2f)));
-		
+
 								w->es[i].fireTimer += w->gun.fireWait;
 								w->bs[j].evil = true;
 							}
@@ -510,8 +555,10 @@ void worldLoop(world * w, float dt, float time){//make member function for convi
 			float2 J_drag = scale(sub(v_feet, add(w->m.v, scale(perp(sub(w->m.r, w->es[i].r)), w->m.omega))), -drag_const*dt);
 			w->es[i].dv = scale(J_drag, 1.0f/w->es[i].m);
 
-			w->m.dv = add(w->m.dv, scale(J_drag, -1.0f/w->m.m));
-			w->m.omega += cross(J_drag, sub(w->m.r, w->es[i].r))/w->m.I;
+			if(w->es[i].health > 0){
+				w->m.dv = add(w->m.dv, scale(J_drag, -1.0f/w->m.m));
+				w->m.omega += cross(J_drag, sub(w->m.r, w->es[i].r))/w->m.I;
+			}
 			w->es[i].r = add(scale(w->es[i].dv, dt/2), add(w->es[i].r, scale(w->es[i].v, dt)));
 			w->es[i].v = add(w->es[i].v, w->es[i].dv);
 
@@ -529,14 +576,30 @@ void worldLoop(world * w, float dt, float time){//make member function for convi
 			}
 
 			if(w->es[i].health > 0 && dotMe(sub(w->plr.r, w->es[i].r)) < sq(0.1)){
+				LPDIRECTSOUNDBUFFER dsb1;
+				sound::ds_face->DuplicateSoundBuffer(sound::snds[1], &dsb1);
+				dsb1->Play(clamp((int) w->gun.fireTimer*1000, 0, 10000), 0, 0);
 				w->plr.health -= 1;
+				gib(w, w->plr.r, w->plr.v, 100);
+			}
+
+			if(touchingBlock(w, w->es[i].r, 0.05f, 2) && w->es[i].health > 0){
+				LPDIRECTSOUNDBUFFER dsb1;
+				sound::ds_face->DuplicateSoundBuffer(sound::snds[1], &dsb1);
+				dsb1->Play(clamp((int) w->gun.fireTimer*1000, 0, 10000), 0, 0);
+				w->es[i].health = 0;
+				gib(w, w->es[i].r, w->es[i].v, 10);
 			}
 
 			for(int b = 0; b < sizeof(w->bs)/sizeof(w->bs[0]); b++){
 				if(w->bs[b].alive > 0.0f && !w->bs[b].evil){
-					if(dotMe(sub(w->bs[b].r, w->es[i].r)) < sq((w->es[i].health > 0) ? 0.1 : 0.3)){
+					if(dotMe(sub(w->bs[b].r, w->es[i].r)) < sq(0.1)){
 						if(w->es[i].health > 0){
+							LPDIRECTSOUNDBUFFER dsb1;
+							sound::ds_face->DuplicateSoundBuffer(sound::snds[1], &dsb1);
+							dsb1->Play(clamp((int) w->gun.fireTimer*1000, 0, 10000), 0, 0);
 							w->es[i].health -= 1;
+							gib(w, w->es[i].r, w->bs[b].v, 10);
 							w->bs[b].alive = 0.0;
 						}
 						w->es[i].v = scale(w->bs[b].v, 0.5);
@@ -545,7 +608,7 @@ void worldLoop(world * w, float dt, float time){//make member function for convi
 			}
 		}
 	}
-	
+
 	{
 		w->m.theta += dt*w->m.omega;
 		w->m.dv = sub(w->m.dv, scale(w->m.v, dt*1.0f));
@@ -566,21 +629,63 @@ void worldLoop(world * w, float dt, float time){//make member function for convi
 				w->bs[i].alive = 0.0f;
 			}
 
-			if(collideMap(w, 0.2, w->bs[i].r, w->bs[i].v, 0.05f)){
+			if(collideMap(w, bm, w->bs[i].r, w->bs[i].v, 0.05f)){
 				w->bs[i].dir = normalize(w->bs[i].v);
-				w->bs[i].alive = 0.025f;
+				w->bs[i].alive = 0.05f;
 			}
 			w->bs[i].alive -= dt;
 
-			if(w->bs[i].evil && dotMe(sub(w->bs[i].r, w->plr.r)) < sq(0.1f)){
-				w->plr.health -= 1;
-				w->bs[i].alive = 0.025f;
+			if(w->bs[i].evil){
+				done = false;
+				if(dotMe(sub(w->bs[i].r, w->plr.r)) < sq(0.1f) && w->plr.health > 0){
+					LPDIRECTSOUNDBUFFER dsb1;
+					sound::ds_face->DuplicateSoundBuffer(sound::snds[1], &dsb1);
+					dsb1->Play(clamp((int) w->gun.fireTimer*1000, 0, 10000), 0, 0);
+					w->plr.health -= 1;
+					w->plr.v= w->bs[i].v;
+					gib(w, w->plr.r, w->bs[i].v, 100);
+					w->bs[i].alive = 0.025f;
+				}
+			}
+		}
+	}
+
+	if(done && w->plr.health > 0){
+		w->nl_timer -= dt;
+	}
+
+	if(w->nl_timer <= 0.0){
+			w->nl_timer = 1.0;
+			loadLevel(*w, (w->m.id+1)%4);
+	}
+
+	for(int i = 0; i < sizeof(w->gibs)/sizeof(w->gibs[0]); i++){
+		if(w->gibs[i].alive > 0.0f){
+			if(!(w->gibs[i].dir == float2(0.0, 0.0))){
+				w->gibs[i].dir = normalize(w->gibs[i].v);
+			}
+			w->gibs[i].v = add(w->gibs[i].v, scale(w->gibs[i].v, -1.0*dt));
+			w->gibs[i].r = add(w->gibs[i].r, scale(w->gibs[i].v, dt));
+
+			/*if(touchingBlock(w, w->gibs[i].r, 0.001f, 1)){
+				w->gibs[i].alive = 0;
+			}*/
+			collideMap(w, 0.001, w->gibs[i].r, w->gibs[i].v, 0.02f);
+			int rnd = rand();
+			if(rnd >= 5231 && rnd < 5231+10){
+				w->gibs[i].alive = 0;
 			}
 		}
 	}
 
 	if(input::pressed(VK_LBUTTON) && w->plr.health > 0.0){//TODO stop bullets from spawning in walls
+		w->unpaused = true;
 		//w->plr.v = sub(w->plr.v, scale(w->plr.dir, 2.0f*dt));
+		if(w->gun.fireTimer <= 0.0){
+			LPDIRECTSOUNDBUFFER dsb1;
+			sound::ds_face->DuplicateSoundBuffer(sound::snds[0], &dsb1);
+			dsb1->Play(clamp((int) w->gun.fireTimer*1000, 0, 10000), 0, 0);
+		}
 		for(int i = 0; i < sizeof(w->bs)/sizeof(w->bs[0]) && w->gun.fireTimer <= 0.0; i++){
 			if(w->bs[i].alive <= 0.0f){
 				w->bs[i].alive = 3.0f;
@@ -592,13 +697,13 @@ void worldLoop(world * w, float dt, float time){//make member function for convi
 				w->bs[i].v = add(relV, w->plr.v);
 				w->bs[i].dir = w->plr.dir;
 
-				w->plr.v = sub(w->plr.v, scale(w->plr.dir, 0.2f));//sub(w->plr.v, scale(relV, 0.152f));
+				w->plr.v = sub(w->plr.v, scale(w->plr.dir, bm));//sub(w->plr.v, scale(relV, 0.152f));
 
-				w->m.v = add(w->m.v, scale(w->plr.dir, w->plr.m*0.2f/w->m.m));
-				w->m.omega -= cross(scale(w->plr.dir, 0.2f), sub(w->m.r, w->plr.r))*w->plr.m/w->m.I;
+				w->m.v = add(w->m.v, scale(w->plr.dir, w->plr.m*bm/w->m.m));
+				w->m.omega -= cross(scale(w->plr.dir, bm), sub(w->m.r, w->plr.r))*w->plr.m/w->m.I;
 
 				w->cam.v = add(w->cam.v, add(scale(randF2, 1.0f), scale(relV, -0.2f)));
-		
+
 				w->gun.fireTimer += w->gun.fireWait;
 				w->bs[i].evil = false;
 			}
@@ -629,6 +734,6 @@ void worldLoop(world * w, float dt, float time){//make member function for convi
 			w->cam.v[i] = v;
 		}
 		
-		w->cam.r = add(add(w->plr.r, scale(w->mousePos, 0.3f)), w->cam.rr);
+		w->cam.r = add(add(w->plr.r, scale(w->mousePos, 0.25f)), w->cam.rr);
 	}
 }

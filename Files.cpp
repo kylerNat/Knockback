@@ -8,6 +8,13 @@ namespace files{
 	#define stat _stat
 	#endif
 
+	off_t getLength(const char * filename){
+		struct stat file_stats;
+		stat(filename, &file_stats);
+		off_t length = file_stats.st_size;
+		return length;
+	}
+
 	const char * getString(const char * filename){
 		FILE * file;
 		fopen_s(&file, filename, "rb");
@@ -26,7 +33,7 @@ namespace files{
 		return out;
 	}
 
-	off_t read(const char * filename, void * out){
+	off_t getSound(const char * filename, void * out){
 		FILE * file;
 		fopen_s(&file, filename, "rb");
 
@@ -36,9 +43,10 @@ namespace files{
 		off_t length = file_stats.st_size;
 
 		//read the file
-		out = new char[length];
-		char * o = (char*) out;
-		fread(o, sizeof(o[0]), length, file);
+		//out = new char[length];
+		//char * o = (char*) out;
+		fseek(file, 42, SEEK_SET);
+		fread(out, sizeof(char), length, file);
 
 		fclose(file);
 		return length;

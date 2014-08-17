@@ -69,6 +69,7 @@
     <ClInclude Include="Platform.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="RenderingStructs.h" />
+    <ClInclude Include="Sound.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files.cpp" />
@@ -77,6 +78,7 @@
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="RenderingStructs.cpp" />
+    <ClCompile Include="Sound.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\Fragment.frag" />

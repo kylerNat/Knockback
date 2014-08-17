@@ -152,3 +152,5 @@ float bClamp(float a, float min);
 float random();
 
 float sq(float a);
+
+float mod(float a, float m);

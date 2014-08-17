@@ -3,6 +3,7 @@
 //platform specific code goes here
 
 #include "Files.h"
+#include "Sound.h"
 #include "Input.h"
 #include "Math.h"
 #include "RenderingStructs.h"

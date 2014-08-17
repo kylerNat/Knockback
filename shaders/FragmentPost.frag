@@ -85,7 +85,7 @@ float reflectance(vec3 position, vec3 normal, vec3 lightIn){
 }
 
 vec2 trans_coord(vec2 c){
-	return (vec4(c-0.5, 1.0, 1.0)*trans_w).xy*0.5*20.0/25.0+0.5;
+	return (vec4(2.0*(c-0.5), 1.0, 1.0)*trans_w).xy*0.5*20.0/25.0+0.5;
 }
 
 void main(void) {
@@ -98,10 +98,10 @@ void main(void) {
 	      -texture(wh, trans_coord(p_t+vec2( 0.01, -0.01))).x +     texture(wh, trans_coord(p_t+vec2( 0.01, 0.01))).x
       -2.0*texture(wh, trans_coord(p_t+vec2( 0.0 , -0.01))).x + 2.0*texture(wh, trans_coord(p_t+vec2( 0.0 , 0.01))).x
 	      -texture(wh, trans_coord(p_t+vec2(-0.01, -0.01))).x +     texture(wh, trans_coord(p_t+vec2(-0.01, 0.01))).x);
-
+		  
 	gl_FragColor.xyz = tex2D(tex, gl_FragCoord.xy/res).xyz;
-	//refraction
 
+	//refraction
 	if(tex2D(tex, gl_FragCoord.xy/res).w >= 0.05f){
 		norm = -0.75*vec2(sin(pos.y*20.0+time*5.0), sin(pos.x*20.0+time*5.0));
 	}
@@ -119,8 +119,9 @@ void main(void) {
 
 	vec2 texPos = gl_FragCoord.xy/res+0.1*v_r.xy/v_r.z*(1.0+texture(wh, trans_coord(p_t)).x);//-0.15*(0.005*norm+0.01*(gl_FragCoord.xy/res - vec2(0.5, 0.5))+0.00075*vec2(wavy(1000.0*pos.xy), wavy(1000.0*pos.yx)));//TODO: use actual refraction
 	if(tex2D(tex, gl_FragCoord.xy/res).w <= 0.5f){
-		if(tex2D(tex, texPos).w <= 0.5f){
+		if(true){//tex2D(tex, texPos).w <= 0.5f){
 			gl_FragColor.xyz = tex2D(tex, texPos).xyz;
+			gl_FragColor.xyz += 0.25*vec3(0.5);
 			
 			//gl_FragColor.xyz *= 0.75f;
 			//gl_FragColor.xyz += 0.5*vec3(0.11, 0.42, 0.63);
@@ -141,12 +142,18 @@ void main(void) {
 		else {
 			gl_FragColor.xyz += 0.25*vec3(0.5);
 		}
-		//gl_FragColor.xyz *= vec3(0.5, 0.8, 2.0);
+		gl_FragColor.xyz *= vec3(0.5, 0.8, 2.0);
+
+		if(tex2D(tex, gl_FragCoord.xy/res).w >= 0.125f){
+			gl_FragColor.xyz *= 1.0+sin(time/0.05);
+		}
 	}
 	//gl_FragColor.xyz = vec3(0.5);
 	//gl_FragColor.xyz = 0.5*gl_FragColor.xyz+0.5*texture(wh, gl_FragCoord.xy/(res-20)).xxx;
 
 	//gl_FragColor.xyz = 0.5*gl_FragColor.xyz-0.5*texture(wh, trans_coord(p_t)).xxx;
+
+	//gl_FragColor.xyz = vec3(norm, 1.0);
 
 	/*if(trans_coord(p_t).x < 0.0 || trans_coord(p_t).y < 0.0 || trans_coord(p_t).x > 1.0|| trans_coord(p_t).y > 1.0){
 		gl_FragColor.xyz = vec3(1.0);

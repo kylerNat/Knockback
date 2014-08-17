@@ -58,3 +58,7 @@ float random(){
 float sq(float a){
 	return a*a;
 }
+
+float mod(float a, float m){
+	return m*((a/m)-floor(a/m));
+}

@@ -1,9 +1,176 @@
-﻿Build started 8/1/2014 10:12:06 PM.
+﻿Build started 8/17/2014 12:26:35 AM.
      1>Project "C:\Users\Kyler\Programing Stuffs\Knockback\Knockback\Knockback.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Knockback.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         All outputs are up-to-date.
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Users\Kyler\Programing Stuffs\Knockback\glext" /I"C:\Users\Kyler\Programing Stuffs\Knockback\glew-1.10.0\include" /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Game.cpp Platform.cpp
+         Game.cpp
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(14): warning C4305: 'initializing' : truncation from 'double' to 'const float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(56): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(56): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(57): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(58): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(58): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(59): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(59): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(60): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(61): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(61): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(62): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(62): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(63): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(64): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(64): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(65): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(65): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(66): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(67): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(67): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(96): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(98): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(99): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(99): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(100): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(100): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(101): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(102): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(102): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(103): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(103): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(104): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(104): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(105): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(105): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(106): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(107): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(108): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(109): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(140): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(142): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(143): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(145): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(146): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(148): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(149): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(151): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(182): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(184): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(185): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(187): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(188): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(190): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(191): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(193): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(60): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(99): warning C4804: '>' : unsafe use of type 'bool' in operation
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(100): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(119): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(192): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(192): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(192): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(192): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(196): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(199): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(277): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(277): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(277): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(277): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(278): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(278): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(286): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(287): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(288): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(294): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(295): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(296): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(274): warning C4101: 'v_b' : unreferenced local variable
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(317): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(317): warning C4244: '+=' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(319): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(324): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(324): warning C4244: '+=' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(326): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(342): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(353): warning C4804: '<=' : unsafe use of type 'bool' in operation
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(359): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(359): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(360): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(377): warning C4804: '<=' : unsafe use of type 'bool' in operation
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(395): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(414): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(431): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(431): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(432): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(432): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(475): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(481): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(578): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(596): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(663): warning C4804: '>' : unsafe use of type 'bool' in operation
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(667): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.cpp(673): warning C4305: 'argument' : truncation from 'double' to 'float'
+         Generating Code...
+         Compiling...
+         Platform.cpp
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(14): warning C4305: 'initializing' : truncation from 'double' to 'const float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(56): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(56): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(57): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(58): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(58): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(59): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(59): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(60): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(61): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(61): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(62): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(62): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(63): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(64): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(64): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(65): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(65): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(66): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(67): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(67): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(96): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(98): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(99): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(99): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(100): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(100): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(101): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(102): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(102): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(103): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(103): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(104): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(104): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(105): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(105): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(106): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(107): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(108): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(109): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(140): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(142): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(143): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(145): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(146): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(148): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(149): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(151): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(182): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(184): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(185): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(187): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(188): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(190): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(191): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\game.h(193): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\kyler\programing stuffs\knockback\knockback\platform.cpp(696): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\kyler\programing stuffs\knockback\knockback\platform.cpp(697): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+         Generating Code...
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.exe" /NOLOGO /LIBPATH:"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\\Lib\x86" /LIBPATH:"C:\Users\Kyler\Programing Stuffs\Knockback\glew-1.10.0\lib" opengl32.lib glu32.lib glew32.lib winmm.lib dsound.lib dxguid.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Knockback.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.lib" /MACHINE:X86 Debug\Files.obj
          Debug\Game.obj
@@ -11,6 +178,7 @@
          Debug\Math.obj
          Debug\Platform.obj
          Debug\RenderingStructs.obj
+         Debug\Sound.obj
          LINK : C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.exe not found or not built by the last incremental link; performing full link
          Knockback.vcxproj -> C:\Users\Kyler\Programing Stuffs\Knockback\Debug\Knockback.exe
        Manifest:
@@ -22,4 +190,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.76
+Time Elapsed 00:00:03.02

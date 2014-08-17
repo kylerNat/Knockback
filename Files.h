@@ -10,7 +10,9 @@
 namespace files{
 	extern const char * getString(const char * filename);
 
-	extern off_t read(const char * filename, void * out);
+	extern off_t getLength(const char * filename);
+
+	extern off_t getSound(const char * filename, void * out);
 
 	extern modelData getVertexData(const char * filename);
 }

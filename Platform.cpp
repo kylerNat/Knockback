@@ -324,17 +324,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 
-	LPDIRECTSOUND8 ds_face;
-	LPDIRECTSOUNDBUFFER dsb;
-	LPDIRECTSOUNDBUFFER8 dsb8;
-
 	{//create sound device
-		auto err = DirectSoundCreate8(0, &ds_face, 0);
+		auto err = DirectSoundCreate8(0, &sound::ds_face, 0);
 		if(err != DS_OK){
 			return err;
 		}
 
-		err = ds_face->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
+		err = sound::ds_face->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
 		if(err != DS_OK){
 			return err;
 		}
@@ -348,39 +344,120 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			16, //wBitsPerSample
 			0, //cbSize
 		};
-
-		DSBUFFERDESC dsb_desc = {
-			sizeof(DSBUFFERDESC),
-			DSBCAPS_CTRLVOLUME|DSBCAPS_CTRLPOSITIONNOTIFY|DSBCAPS_GETCURRENTPOSITION2|DSBCAPS_GLOBALFOCUS,
-			DSBSIZE_MAX,
-			0,//reserved
-			&wft,
-			GUID_NULL,
-		};
 		
-		HRESULT buff_err = ds_face->CreateSoundBuffer(&dsb_desc, &dsb, 0);
-		if(buff_err != DS_OK && buff_err != DS_NO_VIRTUALIZATION){
-			return buff_err;
+		{
+			const char* filename = "sounds/Bullet_Shot1.wav";
+			const off_t filesize = files::getLength(filename);
+
+			DSBUFFERDESC dsb_desc = {
+				sizeof(DSBUFFERDESC),
+				DSBCAPS_CTRLVOLUME|DSBCAPS_CTRLPOSITIONNOTIFY|DSBCAPS_GETCURRENTPOSITION2|DSBCAPS_GLOBALFOCUS,
+				filesize,
+				0,//reserved
+				&wft,
+				GUID_NULL,
+			};
+		
+			HRESULT buff_err = sound::ds_face->CreateSoundBuffer(&dsb_desc, &sound::snds[0], 0);
+			if(buff_err != DS_OK && buff_err != DS_NO_VIRTUALIZATION){
+				return buff_err;
+			}
+
+			//dsb->QueryInterface(IID_IDirectSoundBuffer8, (LPVOID*) &dsb8);
+		
+			DWORD size0;
+			LPVOID snd0;
+			DWORD size1;
+			LPVOID snd1;
+
+			err = sound::snds[0]->Lock(0, filesize, &snd0, &size0, &snd1, &size1, DSBLOCK_ENTIREBUFFER);
+			if(err != DS_OK){
+				return err;
+			}
+			files::getSound(filename, snd0);
+			err = sound::snds[0]->Unlock(snd0, size0, snd1, size1);
+			if(err != DS_OK){
+				return err;
+			}
+
+			sound::snds[0]->SetVolume(-1000);
+		}
+		
+		{//deathsound
+			const char* filename = "sounds/Meaty_Deaths_2.wav";
+			const off_t filesize = files::getLength(filename);
+
+			DSBUFFERDESC dsb_desc = {
+				sizeof(DSBUFFERDESC),
+				DSBCAPS_CTRLVOLUME|DSBCAPS_CTRLPOSITIONNOTIFY|DSBCAPS_GETCURRENTPOSITION2|DSBCAPS_GLOBALFOCUS,
+				filesize,
+				0,//reserved
+				&wft,
+				GUID_NULL,
+			};
+		
+			HRESULT buff_err = sound::ds_face->CreateSoundBuffer(&dsb_desc, &sound::snds[1], 0);
+			if(buff_err != DS_OK && buff_err != DS_NO_VIRTUALIZATION){
+				return buff_err;
+			}
+
+			//dsb->QueryInterface(IID_IDirectSoundBuffer8, (LPVOID*) &dsb8);
+		
+			DWORD size0;
+			LPVOID snd0;
+			DWORD size1;
+			LPVOID snd1;
+
+			err = sound::snds[1]->Lock(0, filesize, &snd0, &size0, &snd1, &size1, DSBLOCK_ENTIREBUFFER);
+			if(err != DS_OK){
+				return err;
+			}
+			files::getSound(filename, snd0);
+			err = sound::snds[1]->Unlock(snd0, size0, snd1, size1);
+			if(err != DS_OK){
+				return err;
+			}
+
+			sound::snds[1]->SetVolume(0);
 		}
 
-		dsb->QueryInterface(IID_IDirectSoundBuffer8, (LPVOID*) &dsb8);
-		
-		LPDWORD size0 = (LPDWORD)53036;
-		char * snd0 = new char[53036];
-		
-		LPDWORD size1 = (LPDWORD)0;
-		char * snd1 = new char[53036];
+		{//stepsound
+			const char* filename = "sounds/Meat_impacts_0.wav";
+			const off_t filesize = files::getLength(filename);
 
-		err = dsb8->Lock(0, 53036, (LPVOID *) snd0, size0, (LPVOID *) snd1, size1, 0);
-		if(err != DS_OK){
-			return err;
+			DSBUFFERDESC dsb_desc = {
+				sizeof(DSBUFFERDESC),
+				DSBCAPS_CTRLVOLUME|DSBCAPS_CTRLPOSITIONNOTIFY|DSBCAPS_GETCURRENTPOSITION2|DSBCAPS_GLOBALFOCUS,
+				filesize,
+				0,//reserved
+				&wft,
+				GUID_NULL,
+			};
+		
+			HRESULT buff_err = sound::ds_face->CreateSoundBuffer(&dsb_desc, &sound::snds[2], 0);
+			if(buff_err != DS_OK && buff_err != DS_NO_VIRTUALIZATION){
+				return buff_err;
+			}
+
+			//dsb->QueryInterface(IID_IDirectSoundBuffer8, (LPVOID*) &dsb8);
+		
+			DWORD size0;
+			LPVOID snd0;
+			DWORD size1;
+			LPVOID snd1;
+
+			err = sound::snds[2]->Lock(0, filesize, &snd0, &size0, &snd1, &size1, DSBLOCK_ENTIREBUFFER);
+			if(err != DS_OK){
+				return err;
+			}
+			files::getSound(filename, snd0);
+			err = sound::snds[2]->Unlock(snd0, size0, snd1, size1);
+			if(err != DS_OK){
+				return err;
+			}
+
+			sound::snds[2]->SetVolume(-2500);
 		}
-		files::read("sounds/Meaty_Deaths_2.wav", snd0);
-		dsb8->Unlock((LPVOID *) snd0, *size0, (LPVOID *) snd1, *size1);
-
-		dsb8->SetCurrentPosition(0);
-		dsb8->SetVolume(10000);
-		dsb8->Play(0, 0, DSBPLAY_LOOPING);
 	}
 
 	SetCursor(0);//disable cursor
@@ -452,8 +529,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		createVO(modelData()),
 		createVO(files::getVertexData("models/floor.ply")),
 		createVO(files::getVertexData("models/wall.ply")),
+		createVO(files::getVertexData("models/electric_floor.ply")),
 		createVO(files::getVertexData("models/crosshair.ply")),
-		createVO(files::getVertexData("models/corpse.ply")),
+		createVO(files::getVertexData("models/gib.ply")),
 		createVO(files::getVertexData("models/person.ply")),
 		createVO(files::getVertexData("models/pirate.ply")),
 		createVO(files::getVertexData("models/bullet.ply")),
@@ -524,10 +602,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	float old_dt = 0.0;
 
 	do {
-		if(input::pressed('Q')){
-			dsb8->Play(0, 0, DSBPLAY_LOOPING);
+		/*
+		if(input::pressed(VK_LBUTTON)){
+			auto err = sound::dsb->Play(0, 0, 0);
+			if(err != DS_OK){
+				return err;
+			}
 		}
-
+		if(input::pressed(VK_RBUTTON)){
+			LPDIRECTSOUNDBUFFER dsb1;
+			sound::ds_face->DuplicateSoundBuffer(sound::dsb, &dsb1);
+			auto err = dsb1->Play(0, 0, 0);
+			if(err != DS_OK){
+				return err;
+			}
+		}
+		*/
 		if(input::pressed('O')){
 			wglSwapIntervalEXT(1);
 		}
